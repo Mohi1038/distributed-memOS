@@ -1,0 +1,28 @@
+.git
+.gitignore
+.dockerignore
+
+# Python SDK and Virtual Environments
+sdk/python/venv
+sdk/python/__pycache__
+sdk/python/*.egg-info
+**/.pytest_cache
+**/.DS_Store
+
+# Go build artifacts
+memos
+memos-server
+bin/
+
+# Local databases / Docker volumes if created locally
+postgres_data/
+qdrant_data/
+neo4j_data/
+grafana_data/
+
+# IDE
+.idea/
+.vscode/
+
+# Deployments
+deployments/
