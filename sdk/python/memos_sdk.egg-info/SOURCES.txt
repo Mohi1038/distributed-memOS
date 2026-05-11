@@ -1,0 +1,10 @@
+setup.py
+memos_sdk/__init__.py
+memos_sdk/client.py
+memos_sdk/memory_pb2.py
+memos_sdk/memory_pb2_grpc.py
+memos_sdk.egg-info/PKG-INFO
+memos_sdk.egg-info/SOURCES.txt
+memos_sdk.egg-info/dependency_links.txt
+memos_sdk.egg-info/requires.txt
+memos_sdk.egg-info/top_level.txt
