@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: memos
+    orgId: 1
+    folder: MemOS
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
