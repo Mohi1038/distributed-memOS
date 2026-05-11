@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package memos.v1;
+
+option go_package = "github.com/mohi1038/memos/proto/memosv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+enum MemoryType {
+  MEMORY_TYPE_UNSPECIFIED = 0;
+  MEMORY_TYPE_EPISODIC = 1;
+  MEMORY_TYPE_SEMANTIC = 2;
+  MEMORY_TYPE_PROCEDURAL = 3;
+  MEMORY_TYPE_REFLECTIVE = 4;
+  MEMORY_TYPE_TRANSIENT = 5;
+}
+
+message Memory {
+  string id = 1;
+  string tenant_id = 2;
+  string agent_id = 3;
+  MemoryType type = 4;
+  string content = 5;
+  repeated float embedding = 6;
+  float importance = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Struct metadata = 10;
+}
+
+message StoreRequest {
+  string tenant_id = 1;
+  string agent_id = 2;
+  MemoryType type = 3;
+  string content = 4;
+  float importance = 5;
+  google.protobuf.Struct metadata = 6;
+}
+
+message StoreResponse {
+  string memory_id = 1;
+  bool success = 2;
+}
+
+message RetrieveRequest {
+  string tenant_id = 1;
+  string agent_id = 2;
+  string query = 3;
+  int32 limit = 4;
+  float similarity_threshold = 5;
+  // Weighting factors for ranking
+  float alpha_semantic = 6;
+  float beta_temporal = 7;
+  float gamma_importance = 8;
+}
+
+message RetrieveResponse {
+  repeated ScoredMemory memories = 1;
+}
+
+message ScoredMemory {
+  Memory memory = 1;
+  float score = 2;
+}
+
+service MemoryService {
+  rpc Store(StoreRequest) returns (StoreResponse);
+  rpc Retrieve(RetrieveRequest) returns (RetrieveResponse);
+}
