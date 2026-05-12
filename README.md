@@ -30,11 +30,14 @@ flowchart TB
     classDef storage fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000;
 
     Client([AI Agent / API Client]):::client
+    n8n([n8n Workflow Engine]):::client
     
     subgraph Gateway ["MemOS Gateway Layer"]
         API[gRPC Handler]:::gateway
         Auth[RBAC & Tenant Isolation]:::gateway
+        Breaker[Circuit Breaker]:::gateway
         API --> Auth
+        Auth --> Breaker
     end
 
     subgraph Core ["Cognitive Core"]
@@ -49,11 +52,13 @@ flowchart TB
         QD[(Qdrant<br/>Vector Search)]:::storage
         Neo[(Neo4j<br/>Graph/Entities)]:::storage
         Redis[(Redis<br/>LRU Cache)]:::storage
+        DLQ[(NATS DLQ)]:::storage
     end
 
     Client ==gRPC==> API
-    Auth --> Rank
-    Auth --> Reflect
+    n8n --Webhooks--> API
+    Breaker --> Rank
+    Breaker --> Reflect
     
     Rank --> Redis
     Rank -.Cache Miss.-> QD
@@ -62,6 +67,7 @@ flowchart TB
     Conflict --> Neo
     Reflect --> PG
     Age --> PG
+    Replicate[Replication] --> DLQ
 ```
 
 ---
@@ -138,6 +144,12 @@ stateDiagram-v2
     AntiEntropy --> ActiveState
 ```
 
+### Reliability & Resilience
+MemOS is built for production stability:
+- **Circuit Breakers**: External calls to OpenAI/Embeddings are protected by circuit breakers to prevent cascading failures.
+- **Dead Letter Queues (DLQ)**: Failed replication events are automatically routed to NATS DLQ subjects for manual recovery and audit.
+- **Health Checks**: Deep health monitoring for all backing stores (Postgres, Qdrant, Neo4j).
+
 ---
 
 ## Data Model & Isolation
@@ -187,11 +199,14 @@ Agent developers can interact with MemOS instantly using the official Python SDK
 
 ### 1. Installation
 
-Navigate to the SDK directory and install it locally:
+The official SDK is available on PyPI:
+```bash
+pip install memos-sdk
+```
+
+Or install it locally from the source:
 ```bash
 cd sdk/python
-python3 -m venv venv
-source venv/bin/activate
 pip install -e .
 ```
 
@@ -262,4 +277,7 @@ MemOS exposes real-time Prometheus metrics.
 - **Metrics Endpoint**: `http://localhost:9090/metrics`
 - Tracks: Memory latency, cache hit rates, replication lag, and RBAC auth denials.
 
----
+### 4. Workflow Automation (n8n)
+MemOS integrates seamlessly with **n8n** for visual workflow orchestration.
+- **Dashboard**: `http://localhost:5678`
+- **Use Case**: Automatically ingest Slack messages, emails, or RSS feeds into agent memory.

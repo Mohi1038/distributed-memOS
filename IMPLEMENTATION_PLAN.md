@@ -6,6 +6,7 @@
 - **Phase 3: Multi-Tenancy & Security** (RBAC, Tenant Isolation via RLS)
 - **Phase 4: Distributed Fabric** (Gossip Protocol, NATS Replication, Anti-Entropy)
 - **Phase 5: Memory Lifecycle** (Reflection Worker, Aging Pipeline)
+- **Phase 6: External Integrations & SDK** (n8n, PyPI Library, Circuit Breakers)
 
 ## 🛠️ Work in Progress (Active)
 
@@ -14,7 +15,7 @@
 - Dead Letter Queues (DLQ) in NATS for failed replication events. ✅ Done
 
 ### Code Quality & Documentation
-- 90%+ Test Coverage for core logic (Replication, Ranking). 🏗️ In Progress (Ranking Logic Done)
+- 90%+ Test Coverage for core logic (Replication, Ranking). ✅ Done (Ranking & Core logic)
 - Strict linting and Go benchmark tests for hot paths. ✅ Done (added .golangci.yml and benchmarks)
 - Comprehensive OpenAPI/Swagger and gRPC documentation. ✅ Done (Comments added, reflection enabled)
 
