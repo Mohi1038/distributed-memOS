@@ -1,3 +1,4 @@
+// Distributed MemOS - API: Tenant-Aware Configuration and Handlers
 package api
 
 import (
