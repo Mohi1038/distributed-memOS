@@ -10,6 +10,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memos -d memos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -86,8 +91,26 @@ services:
       neo4j:
         condition: service_started
 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - memos-server
+
 volumes:
   postgres_data:
   qdrant_data:
   neo4j_data:
   grafana_data:
+  n8n_data:
