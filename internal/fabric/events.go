@@ -130,6 +130,22 @@ func NewEventSubscriber(nc *nats.Conn) *EventSubscriber {
 	return &EventSubscriber{nc: nc}
 }
 
+// publishToDLQ sends failed messages to a dead-letter queue subject
+func (es *EventSubscriber) publishToDLQ(subject string, msg *nats.Msg, err error) {
+	dlqSubject := subject + ".dlq"
+	dlqPayload := struct {
+		Subject string `json:"subject"`
+		Error   string `json:"error"`
+		Data    []byte `json:"data"`
+	}{
+		Subject: subject,
+		Error:   err.Error(),
+		Data:    msg.Data,
+	}
+	data, _ := json.Marshal(dlqPayload)
+	es.nc.Publish(dlqSubject, data)
+}
+
 // SubscribeToMemoryStored subscribes to memory stored events.
 func (es *EventSubscriber) SubscribeToMemoryStored(handler func(event MemoryStoredEvent) error) (*nats.Subscription, error) {
 	return es.nc.Subscribe(EventMemoryStored, func(msg *nats.Msg) {
@@ -139,7 +155,8 @@ func (es *EventSubscriber) SubscribeToMemoryStored(handler func(event MemoryStor
 			return
 		}
 		if err := handler(event); err != nil {
-			fmt.Printf("failed to handle memory stored event: %v\n", err)
+			fmt.Printf("failed to handle memory stored event: %v, sending to DLQ\n", err)
+			es.publishToDLQ(EventMemoryStored, msg, err)
 		}
 	})
 }
