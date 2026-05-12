@@ -141,6 +141,22 @@ func (s *PostgresStore) EnsureEnterpriseSchema(ctx context.Context) error {
 	return nil
 }
 
+// EnsureCognitiveSchema adds cognitive aging and reinforcement fields to the memories table.
+func (s *PostgresStore) EnsureCognitiveSchema(ctx context.Context) error {
+	statements := []string{
+		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS last_accessed TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP`,
+		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS retrieval_count BIGINT DEFAULT 0`,
+		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS reinforcement_score FLOAT DEFAULT 0.0`,
+		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS decay_factor FLOAT DEFAULT 0.1`,
+	}
+	for _, statement := range statements {
+		if _, err := s.Pool.Exec(ctx, statement); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // EnsureDevPrincipal seeds a development tenant and agent when the database is empty.
 func (s *PostgresStore) EnsureDevPrincipal(ctx context.Context, tenantID, agentID uuid.UUID) error {
 	return s.withBypassSession(ctx, func(tx pgx.Tx) error {
@@ -255,12 +271,12 @@ func (s *PostgresStore) ListAuditLogs(ctx context.Context, tenantID pgtype.UUID,
 func (s *PostgresStore) SaveMemory(ctx context.Context, m *MemoryModel) error {
 	return s.withTenantSession(ctx, uuid.UUID(m.TenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO memories (tenant_id, agent_id, type, content, importance, metadata)
-			VALUES ($1, $2, $3, $4, $5, $6)
-			RETURNING id, created_at, updated_at
+			INSERT INTO memories (tenant_id, agent_id, type, content, importance, metadata, decay_factor)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			RETURNING id, last_accessed, retrieval_count, reinforcement_score, decay_factor, created_at, updated_at
 		`
-		return tx.QueryRow(ctx, query, m.TenantID, m.AgentID, m.Type, m.Content, m.Importance, m.Metadata).
-			Scan(&m.ID, &m.CreatedAt, &m.UpdatedAt)
+		return tx.QueryRow(ctx, query, m.TenantID, m.AgentID, m.Type, m.Content, m.Importance, m.Metadata, m.DecayFactor).
+			Scan(&m.ID, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.CreatedAt, &m.UpdatedAt)
 	})
 }
 
@@ -268,7 +284,9 @@ func (s *PostgresStore) GetMemoriesByAgent(ctx context.Context, tenantID, agentI
 	var memories []*MemoryModel
 	err := s.withTenantSession(ctx, uuid.UUID(tenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
-			SELECT id, tenant_id, agent_id, type, content, importance, metadata, created_at, updated_at
+			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       created_at, updated_at
 			FROM memories
 			WHERE tenant_id = $1 AND agent_id = $2
 		`
@@ -313,7 +331,9 @@ func (s *PostgresStore) GetMemoryByIDForTenant(ctx context.Context, tenantID pgt
 	var m MemoryModel
 	err := s.withTenantSession(ctx, uuid.UUID(tenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
-			SELECT id, tenant_id, agent_id, type, content, importance, metadata, created_at, updated_at
+			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       created_at, updated_at
 			FROM memories
 			WHERE id = $1 AND tenant_id = $2
 		`
@@ -331,7 +351,9 @@ func (s *PostgresStore) GetEpisodicCandidates(ctx context.Context, minAge time.D
 	var memories []*MemoryModel
 	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, tenant_id, agent_id, type, content, importance, metadata, created_at, updated_at
+			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       created_at, updated_at
 			FROM memories
 			WHERE type = 'MEMORY_TYPE_EPISODIC'
 			AND created_at < $1
@@ -390,7 +412,9 @@ func (s *PostgresStore) GetMemoryByIDRaw(ctx context.Context, id string) (*Memor
 	var m MemoryModel
 	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, tenant_id, agent_id, type, content, importance, metadata, created_at, updated_at
+			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       created_at, updated_at
 			FROM memories
 			WHERE id = $1
 		`
@@ -458,7 +482,8 @@ func (s *PostgresStore) GetColdMemories(ctx context.Context, olderThan time.Dura
 			FROM memories
 			WHERE type = 'MEMORY_TYPE_EPISODIC'
 			  AND importance < $1
-			  AND created_at < NOW() - $2::interval
+			  AND last_accessed < NOW() - $2::interval
+			  AND reinforcement_score < $1 * 2 -- Reinforced memories survive longer
 			  AND (metadata->>'archived') IS NULL
 			ORDER BY created_at ASC
 			LIMIT 50
@@ -500,6 +525,30 @@ func (s *PostgresStore) DeleteMemory(ctx context.Context, id string) error {
 	return s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `DELETE FROM memories WHERE id = $1`
 		_, err := tx.Exec(ctx, query, id)
+		return err
+	})
+}
+// IncrementRetrievalStats updates the last_accessed time and increments the count/reinforcement.
+func (s *PostgresStore) IncrementRetrievalStats(ctx context.Context, id string, reinforcementDelta float64) error {
+	return s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		query := `
+			UPDATE memories
+			SET last_accessed = NOW(),
+			    retrieval_count = retrieval_count + 1,
+			    reinforcement_score = reinforcement_score + $2,
+			    updated_at = NOW()
+			WHERE id = $1
+		`
+		_, err := tx.Exec(ctx, query, id, reinforcementDelta)
+		return err
+	})
+}
+
+// UpdateDecayFactor adjusts the decay rate for a memory (used by reinforcement logic).
+func (s *PostgresStore) UpdateDecayFactor(ctx context.Context, id string, factor float64) error {
+	return s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		query := `UPDATE memories SET decay_factor = $2, updated_at = NOW() WHERE id = $1`
+		_, err := tx.Exec(ctx, query, id, factor)
 		return err
 	})
 }

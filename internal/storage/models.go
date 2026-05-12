@@ -13,10 +13,14 @@ type MemoryModel struct {
 	AgentID    pgtype.UUID `db:"agent_id"`
 	Type       string      `db:"type"`
 	Content    string      `db:"content"`
-	Importance float64     `db:"importance"`
-	Metadata   []byte      `db:"metadata"`
-	CreatedAt  time.Time   `db:"created_at"`
-	UpdatedAt  time.Time   `db:"updated_at"`
+	Importance         float64     `db:"importance"`
+	Metadata           []byte      `db:"metadata"`
+	LastAccessed       time.Time   `db:"last_accessed"`
+	RetrievalCount     int64       `db:"retrieval_count"`
+	ReinforcementScore float64     `db:"reinforcement_score"`
+	DecayFactor        float64     `db:"decay_factor"`
+	CreatedAt          time.Time   `db:"created_at"`
+	UpdatedAt          time.Time   `db:"updated_at"`
 }
 
 type AuditLogModel struct {

@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS memories (
     content TEXT NOT NULL,
     importance FLOAT DEFAULT 0.5,
     metadata JSONB DEFAULT '{}',
+    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    retrieval_count BIGINT DEFAULT 0,
+    reinforcement_score FLOAT DEFAULT 0.0,
+    decay_factor FLOAT DEFAULT 0.1, -- Lambda in the decay formula
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

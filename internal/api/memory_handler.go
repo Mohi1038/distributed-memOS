@@ -277,10 +277,12 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 			}
 		}
 
-		// Compute cognitive score with temporal decay
+		// Compute cognitive score with adaptive decay and reinforcement
 		memoryScore := core.ComputeRank(
 			res.Score,                         // Semantic similarity
 			model.Importance,                  // User-marked importance
+			model.ReinforcementScore,          // Adaptive reinforcement
+			model.DecayFactor,                 // Adaptive decay rate
 			model.CreatedAt,                   // Memory age
 			weights,
 		)
@@ -382,6 +384,13 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 		}
 		contentSeen[key] = struct{}{}
 		finalMemories = append(finalMemories, item)
+
+		// 4. Update Retrieval Stats (Reinforcement)
+		// Each retrieval increases reinforcement by a default delta (e.g., 0.1)
+		go func(id string) {
+			h.db.IncrementRetrievalStats(context.Background(), id, 0.1)
+		}(item.Memory.Id)
+
 		if len(finalMemories) >= int(limit) {
 			break
 		}

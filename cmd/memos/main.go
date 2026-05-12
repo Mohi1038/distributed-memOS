@@ -70,6 +70,9 @@ func main() {
 	if err := db.EnsureEnterpriseSchema(ctx); err != nil {
 		log.Fatalf("Failed to ensure audit schema: %v", err)
 	}
+	if err := db.EnsureCognitiveSchema(ctx); err != nil {
+		log.Fatalf("Failed to ensure cognitive schema: %v", err)
+	}
 	devTenantID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 	devAgentID := uuid.MustParse("00000000-0000-0000-0000-000000000002")
 	if err := db.EnsureDevPrincipal(ctx, devTenantID, devAgentID); err != nil {
@@ -255,6 +258,10 @@ func main() {
 	// Memory Aging Pipeline (Phase 5)
 	agingWorker := core.NewAgingWorker(db, qdrantStore)
 	agingWorker.Start(ctx)
+
+	// Memory Consolidation Pipeline (Phase 1.3)
+	consolidator := core.NewMemoryConsolidator(db, qdrantStore, summarizer)
+	go consolidator.Run(ctx, 4*time.Hour) // Consolidate every 4 hours
 
 	// Initialize gRPC Server
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
