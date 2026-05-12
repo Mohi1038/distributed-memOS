@@ -1,3 +1,4 @@
+// Distributed MemOS - Fabric: Gossip, Replication, and Anti-Entropy
 package fabric
 
 import (
