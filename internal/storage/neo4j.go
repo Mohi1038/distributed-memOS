@@ -29,6 +29,7 @@ func (s *Neo4jStore) Close(ctx context.Context) error {
 }
 
 // IndexMemory creates a Memory node and MENTIONS relationships to Entity nodes.
+// If the relationship already exists, it increments the 'weight' (Hebbian Learning).
 func (s *Neo4jStore) IndexMemory(ctx context.Context, memoryID, tenantID, agentID, content string, entities []string) error {
 	session := s.Driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close(ctx)
@@ -44,7 +45,10 @@ func (s *Neo4jStore) IndexMemory(ctx context.Context, memoryID, tenantID, agentI
 		for _, e := range entities {
 			_, err := tx.Run(ctx,
 				`MERGE (t:Entity {name:$name})
-				 MERGE (m:Memory {id:$id})-[:MENTIONS]->(t)`,
+				 MERGE (m:Memory {id:$id})
+				 MERGE (m)-[r:MENTIONS]->(t)
+				 ON CREATE SET r.weight = 1.0
+				 ON MATCH SET r.weight = r.weight + 1.0`,
 				map[string]any{"name": e, "id": memoryID})
 			if err != nil {
 				return nil, err
@@ -56,14 +60,29 @@ func (s *Neo4jStore) IndexMemory(ctx context.Context, memoryID, tenantID, agentI
 }
 
 // GetRelatedMemoryIDsForTenant returns tenant-scoped memory IDs connected via shared entities.
+// It supports multi-hop expansion (default depth 2) and ranks by aggregated edge weights.
 func (s *Neo4jStore) GetRelatedMemoryIDsForTenant(ctx context.Context, tenantID, memoryID string, depth int, limit int) ([]string, error) {
+	if depth <= 0 {
+		depth = 2
+	}
 	session := s.Driver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)
 
 	res, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		query := `MATCH (m:Memory {id:$id, tenant_id:$tenant})-[:MENTIONS]->(e:Entity)<-[:MENTIONS]-(related:Memory {tenant_id:$tenant})
-		          RETURN DISTINCT related.id AS id LIMIT $limit`
-		result, err := tx.Run(ctx, query, map[string]any{"id": memoryID, "tenant": tenantID, "limit": limit})
+		// Multi-hop expansion: Memory -> Entity <- Memory -> Entity <- Memory
+		// We sum the weights of the 'MENTIONS' relationships to rank the expansion.
+		query := `MATCH (m:Memory {id:$id, tenant_id:$tenant})
+		          MATCH (m)-[r1:MENTIONS*1..$depth]-(related:Memory {tenant_id:$tenant})
+		          WHERE m <> related
+		          RETURN DISTINCT related.id AS id, count(r1) as strength
+		          ORDER BY strength DESC
+		          LIMIT $limit`
+		result, err := tx.Run(ctx, query, map[string]any{
+			"id":     memoryID,
+			"tenant": tenantID,
+			"depth":  depth,
+			"limit":  limit,
+		})
 		if err != nil {
 			return nil, err
 		}

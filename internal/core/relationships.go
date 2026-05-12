@@ -6,40 +6,53 @@ import (
     "strings"
 )
 
-// ExtractEntities is a simple MVP entity extractor: it finds capitalized words
-// and common multi-word proper nouns. This is intentionally simple for Phase 3.
+var domainKeywords = []string{
+	"Redis", "NATS", "Postgres", "SQL", "Rust", "Go", "Golang", "Python", 
+	"Kubernetes", "Docker", "Replication", "MemOS", "RAG", "LLM", "Vector",
+	"Anti-Entropy", "Consensus", "Distributed", "Shard", "Cluster",
+}
+
+// ExtractEntities finds domain-specific keywords and proper nouns.
 func ExtractEntities(text string) []string {
-    // remove punctuation except spaces
-    re := regexp.MustCompile(`[.,!?;:"()\[\]{}]`)
-    cleaned := re.ReplaceAllString(text, "")
+	entitiesMap := make(map[string]struct{})
+	lowerText := strings.ToLower(text)
 
-    words := strings.Fields(cleaned)
-    entitiesMap := make(map[string]struct{})
+	// 1. Domain keyword spotting
+	for _, kw := range domainKeywords {
+		if strings.Contains(lowerText, strings.ToLower(kw)) {
+			entitiesMap[kw] = struct{}{}
+		}
+	}
 
-    for i, w := range words {
-        if len(w) == 0 { continue }
-        // multiword proper noun: consecutive capitalized words
-        if isCapitalized(w) {
-            entity := w
-            // look ahead
-            for j := i+1; j < len(words); j++ {
-                if isCapitalized(words[j]) {
-                    entity += " " + words[j]
-                    i = j
-                } else {
-                    break
-                }
-            }
-            entitiesMap[entity] = struct{}{}
-            continue
-        }
-    }
+	// 2. Proper Noun detection (Capitalized words)
+	re := regexp.MustCompile(`[.,!?;:"()\[\]{}]`)
+	cleaned := re.ReplaceAllString(text, "")
+	words := strings.Fields(cleaned)
 
-    var entities []string
-    for e := range entitiesMap {
-        entities = append(entities, e)
-    }
-    return entities
+	for i := 0; i < len(words); i++ {
+		w := words[i]
+		if isCapitalized(w) {
+			entity := w
+			for j := i + 1; j < len(words); j++ {
+				if isCapitalized(words[j]) {
+					entity += " " + words[j]
+					i = j
+				} else {
+					break
+				}
+			}
+			// Only add if it's not a common start-of-sentence word
+			if len(entity) > 2 {
+				entitiesMap[entity] = struct{}{}
+			}
+		}
+	}
+
+	var entities []string
+	for e := range entitiesMap {
+		entities = append(entities, e)
+	}
+	return entities
 }
 
 func isCapitalized(s string) bool {

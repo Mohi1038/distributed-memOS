@@ -8,18 +8,18 @@ This document outlines the engineering roadmap to transition Distributed MemOS f
 **Goal:** Transition from a "weighted vector search" to a dynamic, biological-inspired memory system.
 
 ### 1.1 Adaptive Memory Aging (Decay)
-- [ ] **Infrastructure**: Add `last_accessed`, `reinforcement_score`, and `decay_factor` to the `memory` schema.
-- [ ] **Ranking**: Implement the retention formula: $Retention(t) = Importance \cdot e^{-\lambda t}$.
-- [ ] **Worker**: Create a background decay worker that periodically updates `decay_factor` for inactive memories.
+- [x] **Infrastructure**: Add `last_accessed`, `reinforcement_score`, and `decay_factor` to the `memory` schema.
+- [x] **Ranking**: Implement the retention formula: $Retention(t) = Importance \cdot e^{-\lambda t}$.
+- [x] **Worker**: Create a background decay worker that periodically updates `decay_factor` for inactive memories.
 
 ### 1.2 Memory Reinforcement
-- [ ] **Feedback Loop**: Update the `retrieve` API to increment `retrieval_count` and `reinforcement_score` on successful context usage.
-- [ ] **Dynamic Priority**: Adjust the aging worker to slow down decay for reinforced memories (spaced repetition).
+- [x] **Feedback Loop**: Update the `retrieve` API to increment `retrieval_count` and `reinforcement_score` on successful context usage.
+- [x] **Dynamic Priority**: Adjust the aging worker to slow down decay for reinforced memories (spaced repetition).
 
 ### 1.3 Memory Consolidation
-- [ ] **Clustering**: Implement a background job using HDBSCAN or similar to cluster semantically redundant episodic memories.
-- [ ] **Summarization**: Use an LLM worker to consolidate clusters into high-level "Semantic Knowledge" nodes.
-- [ ] **Cleanup**: Archive or delete the fragmented episodic base after successful consolidation.
+- [x] **Clustering**: Implement a background job using HDBSCAN or similar to cluster semantically redundant episodic memories.
+- [x] **Summarization**: Use an LLM worker to consolidate clusters into high-level "Semantic Knowledge" nodes.
+- [x] **Cleanup**: Archive or delete the fragmented episodic base after successful consolidation.
 
 ---
 
@@ -27,13 +27,13 @@ This document outlines the engineering roadmap to transition Distributed MemOS f
 **Goal:** Use Neo4j for measurable context expansion, not just architectural visibility.
 
 ### 2.1 Entity-Centric Memory Graphs
-- [ ] **Extraction**: Integrate Entity Extraction (NER) into the storage pipeline.
-- [ ] **Mapping**: Link memories via shared entities (People, Projects, Technologies) in Neo4j.
-- [ ] **Graph Search**: Implement a 2-hop neighbor expansion during retrieval to find "related context" that lacks semantic similarity.
+- [x] **Extraction**: Integrate Entity Extraction (NER) into the storage pipeline.
+- [x] **Mapping**: Link memories via shared entities (People, Projects, Technologies) in Neo4j.
+- [x] **Graph Search**: Implement a 2-hop neighbor expansion during retrieval to find "related context" that lacks semantic similarity.
 
 ### 2.2 Relationship Strengthening
-- [ ] **Weighted Edges**: Add weights to Neo4j relationships.
-- [ ] **Hebbian Learning**: Increase edge weights when two entities co-occur in reinforced memories.
+- [x] **Weighted Edges**: Add weights to Neo4j relationships.
+- [x] **Hebbian Learning**: Increase edge weights when two entities co-occur in reinforced memories.
 
 ---
 
