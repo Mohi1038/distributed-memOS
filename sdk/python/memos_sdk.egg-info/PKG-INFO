@@ -2,9 +2,65 @@ Metadata-Version: 2.4
 Name: memos-sdk
 Version: 0.1.0
 Summary: Python SDK for the Distributed Memory OS (MemOS)
+License: MIT
 Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: grpcio>=1.50.0
 Requires-Dist: protobuf>=4.21.0
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: license
+Dynamic: license-file
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
+
+# MemOS Python SDK 🧠
+
+Official Python client for **Distributed MemOS**, a production-ready cognitive memory infrastructure for autonomous AI systems.
+
+## Installation
+
+```bash
+pip install memos-sdk
+```
+
+## Quick Start
+
+```python
+from memos_sdk import MemOSClient, MemoryType
+
+# Connect to the MemOS Cluster
+client = MemOSClient("localhost:50051")
+
+tenant_id = "00000000-0000-0000-0000-000000000001"
+agent_id = "00000000-0000-0000-0000-000000000002"
+
+# 1. Store a Memory
+memory_id = client.store(
+    tenant_id=tenant_id,
+    agent_id=agent_id,
+    content="The user prefers a high-contrast dark mode with large fonts.",
+    memory_type=MemoryType.MEMORY_TYPE_EPISODIC,
+    importance=0.85
+)
+print(f"Stored Memory: {memory_id}")
+
+# 2. Retrieve with Cognitive Search
+results = client.retrieve(
+    tenant_id=tenant_id,
+    agent_id=agent_id,
+    query="UI preferences dark mode",
+    limit=3
+)
+
+for res in results:
+    print(f"[{res.score:.2f}] {res.memory.content}")
+```
+
+## Features
+- gRPC based high-performance communication.
+- Supports Cognitive Ranking (Semantic + Temporal + Importance).
+- Thread-safe client implementation.
+- Context manager support (`with MemOSClient() as client:`).

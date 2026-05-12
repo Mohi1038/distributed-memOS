@@ -1,3 +1,5 @@
+LICENSE
+README.md
 setup.py
 memos_sdk/__init__.py
 memos_sdk/client.py
