@@ -64,7 +64,11 @@ message ScoredMemory {
   float score = 2;
 }
 
+// MemoryService provides methods for managing agent memories with cognitive retrieval.
 service MemoryService {
+  // Store saves a new memory for a specific tenant and agent.
   rpc Store(StoreRequest) returns (StoreResponse);
+  
+  // Retrieve performs a semantic and cognitive search for memories based on a query.
   rpc Retrieve(RetrieveRequest) returns (RetrieveResponse);
 }
