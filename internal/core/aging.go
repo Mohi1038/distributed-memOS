@@ -1,3 +1,4 @@
+// Distributed MemOS - Core: Cognitive Ranking and Lifecycle
 package core
 
 import (
