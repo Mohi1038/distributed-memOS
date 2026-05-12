@@ -26,3 +26,5 @@ grafana_data/
 
 # Deployments
 deployments/
+releases/
+sdk/python/dist/
