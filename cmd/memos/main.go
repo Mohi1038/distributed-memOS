@@ -94,7 +94,7 @@ func main() {
 	var dim uint64 = 384 // Mock dimensionality
 	if cfg.UseRealEmbedding && cfg.OpenAIAPIKey != "" {
 		log.Println("Using OpenAI embeddings (1536-dim)")
-		embedder = core.NewOpenAIEmbeddingGenerator(cfg.OpenAIAPIKey, cfg.EmbeddingModel)
+		embedder = core.NewReliableEmbedder(core.NewOpenAIEmbeddingGenerator(cfg.OpenAIAPIKey, cfg.EmbeddingModel))
 		dim = 1536
 	} else {
 		log.Println("Using mock embeddings (set OPENAI_API_KEY and USE_REAL_EMBEDDING=true for production)")
