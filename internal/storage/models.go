@@ -10,9 +10,10 @@ import (
 type MemoryModel struct {
 	ID         pgtype.UUID `db:"id"`
 	TenantID   pgtype.UUID `db:"tenant_id"`
-	AgentID    pgtype.UUID `db:"agent_id"`
-	Type       string      `db:"type"`
-	Content    string      `db:"content"`
+	AgentID            pgtype.UUID `db:"agent_id"`
+	Type               string      `db:"type"`
+	Content            string      `db:"content"`
+	Version            int64       `db:"version"` // Vector clock or logical version
 	Importance         float64     `db:"importance"`
 	Metadata           []byte      `db:"metadata"`
 	LastAccessed       time.Time   `db:"last_accessed"`

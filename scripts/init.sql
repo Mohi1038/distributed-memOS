@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS memories (
     retrieval_count BIGINT DEFAULT 0,
     reinforcement_score FLOAT DEFAULT 0.0,
     decay_factor FLOAT DEFAULT 0.1, -- Lambda in the decay formula
+    version BIGINT DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

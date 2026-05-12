@@ -22,9 +22,10 @@ const (
 
 // ShardSyncEvent carries shard digest data for anti-entropy reconciliation.
 type ShardSyncEvent struct {
-	NodeID    string        `json:"node_id"`
-	Digests   []ShardDigest `json:"digests"`
-	Timestamp time.Time     `json:"timestamp"`
+	NodeID     string        `json:"node_id"`
+	MerkleRoot string        `json:"merkle_root"` // Root hash of the entire local memory set
+	Digests    []ShardDigest `json:"digests"`
+	Timestamp  time.Time     `json:"timestamp"`
 }
 
 // MemoryStoredEvent is published when a memory is stored to NATS.
@@ -36,6 +37,7 @@ type MemoryStoredEvent struct {
 	Embedding  []float32 `json:"embedding"`
 	Type       string    `json:"type"`
 	Importance float32   `json:"importance"`
+	Version    int64     `json:"version"` // Logical version for conflict resolution
 	Timestamp  time.Time `json:"timestamp"`
 }
 

@@ -139,12 +139,19 @@ func (ae *AntiEntropyManager) Stop() {
 func (ae *AntiEntropyManager) runCycle(ctx context.Context) {
 	log.Printf("[AntiEntropy] Starting reconciliation cycle on node %s", ae.localNodeID)
 
-	// 1. Fetch all local memories
+	// 1. Fetch all local memories and compute Merkle Tree
 	memories, err := ae.db.ListAllMemoriesForAntiEntropy(ctx)
 	if err != nil {
 		log.Printf("[AntiEntropy] Failed to list memories: %v", err)
 		return
 	}
+
+	var data [][]byte
+	for _, m := range memories {
+		data = append(data, []byte(m.ID.String()+fmt.Sprintf("%d", m.Version)))
+	}
+	tree := BuildMerkleTree(data)
+	localRoot := tree.GetRootHash()
 
 	// 2. Group memories by shard key and compute checksums
 	shardGroups := make(map[string][]string) // shardKey → []memoryID
@@ -167,18 +174,16 @@ func (ae *AntiEntropyManager) runCycle(ctx context.Context) {
 		})
 	}
 
-	// 3. Publish our digests to peers
+	// 3. Publish our root and digests to peers
 	if err := ae.publisher.PublishShardSync(ctx, ShardSyncEvent{
-		NodeID:  ae.localNodeID,
-		Digests: localDigests,
+		NodeID:     ae.localNodeID,
+		MerkleRoot: localRoot,
+		Digests:    localDigests,
 	}); err != nil {
 		log.Printf("[AntiEntropy] Failed to publish shard digests: %v", err)
 	}
 
 	// 4. Compare with peer digests to find divergence
-	ae.peerDigestsMu.RLock()
-	defer ae.peerDigestsMu.RUnlock()
-
 	// Build local digest index for fast lookup
 	localIndex := make(map[string]ShardDigest)
 	for _, d := range localDigests {
@@ -231,6 +236,7 @@ func (ae *AntiEntropyManager) repairShard(ctx context.Context, shardKey string, 
 			Embedding:  nil, // embeddings will be re-fetched by receiving node
 			Type:       m.Type,
 			Importance: float32(m.Importance),
+			Version:    m.Version,
 			Timestamp:  m.CreatedAt,
 		}
 		if err := ae.publisher.PublishMemoryStored(ctx, event); err != nil {

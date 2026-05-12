@@ -41,17 +41,17 @@ This document outlines the engineering roadmap to transition Distributed MemOS f
 **Goal:** Prove the distributed claims through demonstrable failure-handling and repair.
 
 ### 3.1 Multi-Node Replication Demo
-- [ ] **Orchestration**: Create a `docker-compose.cluster.yml` with 3 independent MemOS nodes.
-- [ ] **Validation**: Implement a suite that stores to Node A and verifies immediate availability on Node C.
+- [x] **Orchestration**: Create a `docker-compose.cluster.yml` with 3 independent MemOS nodes.
+- [x] **Validation**: Implement a suite that stores to Node A and verifies immediate availability on Node C.
 
 ### 3.2 Real Merkle-Tree Anti-Entropy
-- [ ] **Hashing**: Implement per-shard Merkle tree generation for memory content.
-- [ ] **Divergence Detection**: Nodes exchange Merkle roots via Gossip to identify specific "dirty" shards.
-- [ ] **Selective Repair**: Request only the specific divergent memory blocks from peers.
+- [x] **Hashing**: Implement per-shard Merkle tree generation for memory content.
+- [x] **Divergence Detection**: Nodes exchange Merkle roots via Gossip to identify specific "dirty" shards.
+- [x] **Selective Repair**: Request only the specific divergent memory blocks from peers.
 
 ### 3.3 Conflict Resolution
-- [ ] **Versioning**: Implement vector clocks or hybrid logical clocks (HLC) for memory updates.
-- [ ] **Resolution Policies**: Add LWW (Last Writer Wins) and Semantic Merge (LLM-based reconciliation) policies.
+- [x] **Versioning**: Implement vector clocks or hybrid logical clocks (HLC) for memory updates.
+- [x] **Resolution Policies**: Add LWW (Last Writer Wins) and Semantic Merge (LLM-based reconciliation) policies.
 
 ---
 

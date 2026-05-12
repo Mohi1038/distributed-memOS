@@ -148,6 +148,7 @@ func (s *PostgresStore) EnsureCognitiveSchema(ctx context.Context) error {
 		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS retrieval_count BIGINT DEFAULT 0`,
 		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS reinforcement_score FLOAT DEFAULT 0.0`,
 		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS decay_factor FLOAT DEFAULT 0.1`,
+		`ALTER TABLE memories ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1`,
 	}
 	for _, statement := range statements {
 		if _, err := s.Pool.Exec(ctx, statement); err != nil {
@@ -271,12 +272,12 @@ func (s *PostgresStore) ListAuditLogs(ctx context.Context, tenantID pgtype.UUID,
 func (s *PostgresStore) SaveMemory(ctx context.Context, m *MemoryModel) error {
 	return s.withTenantSession(ctx, uuid.UUID(m.TenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO memories (tenant_id, agent_id, type, content, importance, metadata, decay_factor)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
-			RETURNING id, last_accessed, retrieval_count, reinforcement_score, decay_factor, created_at, updated_at
+			INSERT INTO memories (tenant_id, agent_id, type, content, importance, metadata, decay_factor, version)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			RETURNING id, last_accessed, retrieval_count, reinforcement_score, decay_factor, version, created_at, updated_at
 		`
-		return tx.QueryRow(ctx, query, m.TenantID, m.AgentID, m.Type, m.Content, m.Importance, m.Metadata, m.DecayFactor).
-			Scan(&m.ID, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.CreatedAt, &m.UpdatedAt)
+		return tx.QueryRow(ctx, query, m.TenantID, m.AgentID, m.Type, m.Content, m.Importance, m.Metadata, m.DecayFactor, m.Version).
+			Scan(&m.ID, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt)
 	})
 }
 
@@ -285,7 +286,7 @@ func (s *PostgresStore) GetMemoriesByAgent(ctx context.Context, tenantID, agentI
 	err := s.withTenantSession(ctx, uuid.UUID(tenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
 			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
-			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor, version,
 			       created_at, updated_at
 			FROM memories
 			WHERE tenant_id = $1 AND agent_id = $2
@@ -299,7 +300,7 @@ func (s *PostgresStore) GetMemoriesByAgent(ctx context.Context, tenantID, agentI
 		memories = make([]*MemoryModel, 0)
 		for rows.Next() {
 			var m MemoryModel
-			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.CreatedAt, &m.UpdatedAt); err != nil {
+			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt); err != nil {
 				return err
 			}
 			memories = append(memories, &m)
@@ -319,7 +320,7 @@ func (s *PostgresStore) GetMemoryByID(ctx context.Context, id string) (*MemoryMo
 		WHERE id = $1
 	`
 	var m MemoryModel
-	err := s.Pool.QueryRow(ctx, query, id).Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.CreatedAt, &m.UpdatedAt)
+	err := s.Pool.QueryRow(ctx, query, id).Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -332,12 +333,12 @@ func (s *PostgresStore) GetMemoryByIDForTenant(ctx context.Context, tenantID pgt
 	err := s.withTenantSession(ctx, uuid.UUID(tenantID.Bytes), func(tx pgx.Tx) error {
 		query := `
 			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
-			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor, version,
 			       created_at, updated_at
 			FROM memories
 			WHERE id = $1 AND tenant_id = $2
 		`
-		return tx.QueryRow(ctx, query, id, tenantID).Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.CreatedAt, &m.UpdatedAt)
+		return tx.QueryRow(ctx, query, id, tenantID).Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt)
 	})
 	if err != nil {
 		return nil, err
@@ -352,7 +353,7 @@ func (s *PostgresStore) GetEpisodicCandidates(ctx context.Context, minAge time.D
 	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `
 			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
-			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor, version,
 			       created_at, updated_at
 			FROM memories
 			WHERE type = 'MEMORY_TYPE_EPISODIC'
@@ -371,7 +372,7 @@ func (s *PostgresStore) GetEpisodicCandidates(ctx context.Context, minAge time.D
 		memories = make([]*MemoryModel, 0)
 		for rows.Next() {
 			var m MemoryModel
-			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.CreatedAt, &m.UpdatedAt); err != nil {
+			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt); err != nil {
 				return err
 			}
 			memories = append(memories, &m)
@@ -413,14 +414,15 @@ func (s *PostgresStore) GetMemoryByIDRaw(ctx context.Context, id string) (*Memor
 	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `
 			SELECT id, tenant_id, agent_id, type, content, importance, metadata, 
-			       last_accessed, retrieval_count, reinforcement_score, decay_factor,
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor, version,
 			       created_at, updated_at
 			FROM memories
 			WHERE id = $1
 		`
 		return tx.QueryRow(ctx, query, id).Scan(
 			&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content,
-			&m.Importance, &m.Metadata, &m.CreatedAt, &m.UpdatedAt,
+			&m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount,
+			&m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt,
 		)
 	})
 	if err != nil {
@@ -451,7 +453,7 @@ func (s *PostgresStore) ListAllMemoriesForAntiEntropy(ctx context.Context) ([]*M
 	var memories []*MemoryModel
 	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, tenant_id, agent_id, type, importance, created_at, updated_at
+			SELECT id, tenant_id, agent_id, type, importance, version, created_at, updated_at
 			FROM memories
 			ORDER BY created_at DESC
 		`
@@ -463,7 +465,7 @@ func (s *PostgresStore) ListAllMemoriesForAntiEntropy(ctx context.Context) ([]*M
 
 		for rows.Next() {
 			var m MemoryModel
-			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Importance, &m.CreatedAt, &m.UpdatedAt); err != nil {
+			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Importance, &m.Version, &m.CreatedAt, &m.UpdatedAt); err != nil {
 				return err
 			}
 			memories = append(memories, &m)
@@ -551,4 +553,44 @@ func (s *PostgresStore) UpdateDecayFactor(ctx context.Context, id string, factor
 		_, err := tx.Exec(ctx, query, id, factor)
 		return err
 	})
+}
+// UpsertMemoryWithConflictResolution handles incoming memory updates from other nodes.
+// It uses the Version field to ensure causal consistency (LWW).
+func (s *PostgresStore) UpsertMemoryWithConflictResolution(ctx context.Context, m *MemoryModel) (bool, error) {
+	var updated bool
+	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		// 1. Check if memory exists and its current version
+		var currentVersion int64
+		err := tx.QueryRow(ctx, `SELECT version FROM memories WHERE id = $1`, m.ID).Scan(&currentVersion)
+		if err != nil && err != pgx.ErrNoRows {
+			return err
+		}
+
+		if err == pgx.ErrNoRows {
+			// Insert new
+			query := `
+				INSERT INTO memories (id, tenant_id, agent_id, type, content, importance, metadata, decay_factor, version)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			`
+			_, err = tx.Exec(ctx, query, m.ID, m.TenantID, m.AgentID, m.Type, m.Content, m.Importance, m.Metadata, m.DecayFactor, m.Version)
+			updated = true
+			return err
+		}
+
+		// 2. Conflict Resolution: Only update if incoming version is >= current
+		if m.Version > currentVersion {
+			query := `
+				UPDATE memories
+				SET type = $2, content = $3, importance = $4, metadata = $5, decay_factor = $6, version = $7, updated_at = NOW()
+				WHERE id = $1
+			`
+			_, err = tx.Exec(ctx, query, m.ID, m.Type, m.Content, m.Importance, m.Metadata, m.DecayFactor, m.Version)
+			updated = true
+			return err
+		}
+
+		updated = false
+		return nil
+	})
+	return updated, err
 }

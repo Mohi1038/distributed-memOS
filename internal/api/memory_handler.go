@@ -122,6 +122,7 @@ func (h *MemoryHandler) Store(ctx context.Context, req *pb.StoreRequest) (*pb.St
 		Content:    req.Content,
 		Importance: float64(req.Importance),
 		Metadata:   metaBytes,
+		Version:    1, // Initial version
 	}
 
 	if err := h.db.SaveMemory(ctx, model); err != nil {
@@ -179,6 +180,7 @@ func (h *MemoryHandler) Store(ctx context.Context, req *pb.StoreRequest) (*pb.St
 			Embedding:  embedding,
 			Type:       req.Type.String(),
 			Importance: req.Importance,
+			Version:    model.Version,
 		}
 		if err := h.publisher.PublishMemoryStored(ctx, event); err != nil {
 			log.Printf("Failed to publish memory stored event: %v", err)

@@ -106,22 +106,40 @@ func (rm *ReplicationManager) applyReplication(ctx context.Context, event Memory
 		return nil
 	}
 
-	// Apply to local Qdrant (vector index)
-	payload := map[string]interface{}{
-		"tenant_id": event.TenantID,
-		"agent_id":  event.AgentID,
-		"type":      event.Type,
+	// Apply to local Postgres (with conflict resolution)
+	memModel := &storage.MemoryModel{
+		ID:         pgtype.UUID{Bytes: uuid.MustParse(event.MemoryID), Valid: true},
+		TenantID:   pgtype.UUID{Bytes: uuid.MustParse(event.TenantID), Valid: true},
+		AgentID:    pgtype.UUID{Bytes: uuid.MustParse(event.AgentID), Valid: true},
+		Type:       event.Type,
+		Content:    event.Content,
+		Importance: float64(event.Importance),
+		Version:    event.Version,
 	}
 
-	if err := rm.localQdrant.UpsertMemory(ctx, "memories", event.MemoryID, event.Embedding, payload); err != nil {
-		return fmt.Errorf("upsert to qdrant: %w", err)
+	updated, err := rm.localPostgres.UpsertMemoryWithConflictResolution(ctx, memModel)
+	if err != nil {
+		return fmt.Errorf("upsert to postgres: %w", err)
+	}
+
+	if updated {
+		// Apply to local Qdrant (vector index)
+		payload := map[string]interface{}{
+			"tenant_id": event.TenantID,
+			"agent_id":  event.AgentID,
+			"type":      event.Type,
+		}
+		if err := rm.localQdrant.UpsertMemory(ctx, "memories", event.MemoryID, event.Embedding, payload); err != nil {
+			return fmt.Errorf("upsert to qdrant: %w", err)
+		}
+		fmt.Printf("[Replication] Replicated memory %s (v%d) to local node\n", event.MemoryID, event.Version)
+	} else {
+		fmt.Printf("[Replication] Ignored stale memory %s (v%d)\n", event.MemoryID, event.Version)
 	}
 
 	if rm.telemetry != nil {
 		rm.telemetry.RecordReplicationLag(time.Since(event.Timestamp))
 	}
-
-	fmt.Printf("[Replication] Replicated memory %s to local Qdrant\n", event.MemoryID)
 	return nil
 }
 
