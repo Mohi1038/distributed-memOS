@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://img.icons8.com/?size=512&id=vmlQ0k1U6D5D&format=png" alt="Brain Logo" width="120" />
+  <img src="logo.png" alt="MemOS Logo" width="160" />
   <h1>Distributed MemOS</h1>
   <p><em>A Production-Ready Cognitive Memory Infrastructure for Autonomous AI Systems</em></p>
   
