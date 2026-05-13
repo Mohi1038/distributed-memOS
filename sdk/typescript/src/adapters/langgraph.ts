@@ -4,7 +4,7 @@
  */
 
 import { MemOSClient } from '../client';
-import { Memory, MemoryType, ScoredMemory } from '../types';
+import { MemoryType, ScoredMemory } from '../types';
 
 /**
  * LangGraph Tool Configuration

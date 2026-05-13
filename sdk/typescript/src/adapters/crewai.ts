@@ -96,7 +96,6 @@ export function createCrewAIRetrieveTool(
         const formatted = memories
           .map((m: ScoredMemory, idx: number) => {
             const score = (m.score * 100).toFixed(0);
-            const semantic = ((m.breakdown?.semanticScore || 0) * 100).toFixed(0);
             const layer = m.breakdown?.layer || 'unknown';
             return `[${idx + 1}] (${score}% match, ${layer} layer) ${m.memory.content}`;
           })
