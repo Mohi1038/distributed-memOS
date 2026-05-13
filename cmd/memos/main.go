@@ -13,23 +13,23 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mohi1038/memos/internal/api"
 	"github.com/mohi1038/memos/internal/config"
 	"github.com/mohi1038/memos/internal/core"
 	"github.com/mohi1038/memos/internal/fabric"
 	"github.com/mohi1038/memos/internal/storage"
 	pb "github.com/mohi1038/memos/proto"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type roleUpdateRequest struct {
-	TenantID          string `json:"tenant_id"`
-	RequesterAgentID   string `json:"requester_agent_id"`
-	TargetAgentID      string `json:"target_agent_id"`
-	Role              string `json:"role"`
+	TenantID         string `json:"tenant_id"`
+	RequesterAgentID string `json:"requester_agent_id"`
+	TargetAgentID    string `json:"target_agent_id"`
+	Role             string `json:"role"`
 }
 
 func main() {
@@ -115,6 +115,7 @@ func main() {
 	go reflectionWorker.Start(ctx)
 
 	telemetry := core.NewTelemetry()
+	dashboardService := api.NewDashboardService(db, telemetry)
 	go func() {
 		metricsPort := cfg.MetricsPort
 		if metricsPort == "" {
@@ -122,6 +123,8 @@ func main() {
 		}
 		mux := http.NewServeMux()
 		mux.HandleFunc("/metrics", telemetry.Handler)
+		mux.HandleFunc("/api/dashboard/summary", dashboardService.SummaryHandler)
+		mux.Handle("/api/dashboard/stream", dashboardService.StreamHandler())
 		mux.HandleFunc("/audit", func(w http.ResponseWriter, r *http.Request) {
 			tenantID := r.URL.Query().Get("tenant_id")
 			agentID := r.URL.Query().Get("agent_id")
@@ -274,7 +277,7 @@ func main() {
 	handler.SetDistributedFabric(publisher, sharding, gossip)
 	handler.SetTelemetry(telemetry)
 	pb.RegisterMemoryServiceServer(s, handler)
-	
+
 	// Register reflection service on gRPC server for debugging
 	reflection.Register(s)
 
