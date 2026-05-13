@@ -59,9 +59,18 @@ message RetrieveResponse {
   repeated ScoredMemory memories = 1;
 }
 
+message ScoreBreakdown {
+  float semantic_score = 1;      // Semantic similarity percentage
+  float temporal_score = 2;      // Temporal decay / recency percentage
+  float importance_score = 3;    // Importance percentage
+  float reinforcement_score = 4; // Reinforcement / retrieval bonus percentage
+  string layer = 5;              // Memory layer (working, episodic, long_term, archive)
+}
+
 message ScoredMemory {
   Memory memory = 1;
   float score = 2;
+  ScoreBreakdown breakdown = 3; // Phase 4: Explainability breakdown
 }
 
 // MemoryService provides methods for managing agent memories with cognitive retrieval.

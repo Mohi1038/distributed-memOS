@@ -3,10 +3,23 @@ package core
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync/atomic"
 	"time"
 )
+
+// TraceSpan represents a tracing span for retrieval explainability (Phase 4)
+type TraceSpan struct {
+	MemoryID           string
+	Score              float32
+	Layer              string
+	SemanticScore      float32
+	TemporalScore      float32
+	ImportanceScore    float32
+	ReinforcementScore float32
+	Reason             string // Explanation of why this memory was selected
+}
 
 // Telemetry tracks service-level counters and coarse latency.
 type Telemetry struct {
@@ -69,6 +82,20 @@ func (t *Telemetry) RecordReplicationLag(duration time.Duration) {
 			return
 		}
 	}
+}
+
+// Phase 4: TraceRetrievalDecision logs the reasoning behind memory selection
+func (t *Telemetry) TraceRetrievalDecision(span TraceSpan) {
+	log.Printf("[TRACE] Memory %s selected (score=%.3f, layer=%s) | Semantic:%.2f%% Temporal:%.2f%% Importance:%.2f%% Reinforce:%.2f%% | Reason: %s",
+		span.MemoryID,
+		span.Score,
+		span.Layer,
+		float64(span.SemanticScore)*100,
+		float64(span.TemporalScore)*100,
+		float64(span.ImportanceScore)*100,
+		float64(span.ReinforcementScore)*100,
+		span.Reason,
+	)
 }
 
 // Handler returns a minimal Prometheus-compatible metrics payload.

@@ -294,8 +294,40 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 			tenantStr := uuid.UUID(model.TenantID.Bytes).String()
 			agentStr := uuid.UUID(model.AgentID.Bytes).String()
 
+			// Phase 4: Determine memory layer
+			layer := h.determineLayer(model)
+
+			// Phase 4: Trace retrieval decision for explainability
+			reason := fmt.Sprintf("Vector search match (semantic: %.2f%%)", float64(memoryScore.SemanticScore)*100)
+			if memoryScore.TemporalScore > 0 {
+				reason += fmt.Sprintf(" + recency boost (%.2f%%)", float64(memoryScore.TemporalScore)*100)
+			}
+			if memoryScore.ReinforcementScore > 0 {
+				reason += fmt.Sprintf(" + reinforcement (%.2f%%)", float64(memoryScore.ReinforcementScore)*100)
+			}
+
+			if h.telemetry != nil {
+				h.telemetry.TraceRetrievalDecision(core.TraceSpan{
+					MemoryID:           idStr,
+					Score:              memoryScore.FinalScore,
+					Layer:              layer,
+					SemanticScore:      memoryScore.SemanticScore,
+					TemporalScore:      memoryScore.TemporalScore,
+					ImportanceScore:    memoryScore.ImportanceScore,
+					ReinforcementScore: memoryScore.ReinforcementScore,
+					Reason:             reason,
+				})
+			}
+
 			scoredMemories = append(scoredMemories, &pb.ScoredMemory{
 				Score: memoryScore.FinalScore,
+				Breakdown: &pb.ScoreBreakdown{
+					SemanticScore:      memoryScore.SemanticScore,
+					TemporalScore:      memoryScore.TemporalScore,
+					ImportanceScore:    memoryScore.ImportanceScore,
+					ReinforcementScore: memoryScore.ReinforcementScore,
+					Layer:              layer,
+				},
 				Memory: &pb.Memory{
 					Id:         idStr,
 					TenantId:   tenantStr,
@@ -352,8 +384,34 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 
 			tenantStr := uuid.UUID(mModel.TenantID.Bytes).String()
 			agentStr := uuid.UUID(mModel.AgentID.Bytes).String()
+
+			// Phase 4: Determine layer for related memory
+			layer := h.determineLayer(mModel)
+
+			// Phase 4: Trace graph-augmented retrieval decision
+			reason := fmt.Sprintf("Graph neighbor boost from related entities (boost: %.2f%%)", float64(boost)*100)
+			if h.telemetry != nil {
+				h.telemetry.TraceRetrievalDecision(core.TraceSpan{
+					MemoryID:           rid,
+					Score:              0.6 + boost,
+					Layer:              layer,
+					SemanticScore:      0.6,
+					TemporalScore:      0.0,
+					ImportanceScore:    0.0,
+					ReinforcementScore: boost,
+					Reason:             reason,
+				})
+			}
+
 			scoredMemories = append(scoredMemories, &pb.ScoredMemory{
 				Score: 0.6 + boost,
+				Breakdown: &pb.ScoreBreakdown{
+					SemanticScore:      0.6,
+					TemporalScore:      0.0,
+					ImportanceScore:    0.0,
+					ReinforcementScore: boost,
+					Layer:              layer,
+				},
 				Memory: &pb.Memory{
 					Id:         rid,
 					TenantId:   tenantStr,
@@ -436,4 +494,31 @@ func normalizeContentKey(content string) string {
 		return "<empty>"
 	}
 	return normalized
+}
+
+// Phase 4: determineLayer classifies a memory into its hierarchical layer
+// based on access patterns, age, and importance
+func (h *MemoryHandler) determineLayer(model *storage.MemoryModel) string {
+	// Working layer: In-memory cache (< 5 minutes old, active retrieval)
+	if time.Since(model.LastAccessed) < 5*time.Minute && model.RetrievalCount > 0 {
+		return "working"
+	}
+
+	// Episodic layer: Recent interactions (< 30 days, in Qdrant + Postgres)
+	if time.Since(model.CreatedAt) < 30*24*time.Hour {
+		return "episodic"
+	}
+
+	// Long-term layer: Consolidated/Reinforced memories (> 30 days, high importance)
+	if model.Importance > 0.6 || model.ReinforcementScore > 5.0 {
+		return "long_term"
+	}
+
+	// Archive layer: Expired/low-importance memories (> 90 days, low importance)
+	if time.Since(model.CreatedAt) > 90*24*time.Hour && model.Importance < 0.3 {
+		return "archive"
+	}
+
+	// Default to episodic
+	return "episodic"
 }
