@@ -174,6 +174,8 @@ func (w *ReflectionWorker) processGroup(ctx context.Context, key string, memorie
 		return // Need at least 2 memories to extract patterns
 	}
 
+	_ = key // key can be used for logging or future group tracking
+
 	// Extract content for summarization
 	contents := make([]string, len(memories))
 	for i, mem := range memories {

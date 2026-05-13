@@ -3,7 +3,6 @@ package storage
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -397,15 +396,6 @@ func (s *PostgresStore) MarkAsReflected(ctx context.Context, id string) error {
 		_, err := tx.Exec(ctx, query, id)
 		return err
 	})
-}
-
-// encodeAuditMetadata safely serializes audit metadata.
-func encodeAuditMetadata(v interface{}) []byte {
-	data, err := json.Marshal(v)
-	if err != nil {
-		return []byte(`{}`)
-	}
-	return data
 }
 
 // GetMemoryByIDRaw fetches a memory by ID bypassing RLS (used internally by conflict resolver).

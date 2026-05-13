@@ -221,6 +221,8 @@ func (ae *AntiEntropyManager) repairShard(ctx context.Context, shardKey string, 
 		memIndex[m.ID.String()] = m
 	}
 
+	_ = shardKey // shardKey reserved for future shard-specific repair logic
+
 	repaired := 0
 	for _, memID := range memIDs {
 		m, ok := memIndex[memID]

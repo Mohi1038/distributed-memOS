@@ -1,4 +1,3 @@
-package main
 // Distributed MemOS - MCP Server Implementation
 // Implements Model Context Protocol to expose MemOS as an LLM tool
 package main
