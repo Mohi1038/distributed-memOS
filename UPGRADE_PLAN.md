@@ -59,14 +59,14 @@ This document outlines the engineering roadmap to transition Distributed MemOS f
 **Goal:** Optimize for scale, latency, and biological accuracy.
 
 ### 4.1 Hierarchical Memory Layers
-- [ ] **Working**: In-memory Redis cache for active sessions.
-- [ ] **Episodic**: Qdrant/Postgres for recent interactions.
-- [ ] **Long-Term**: Consolidated/Reinforced memories in Neo4j and PG.
-- [ ] **Archive**: Cold storage (S3/Disk) for expired/low-importance memories.
+- [x] **Working**: In-memory Redis cache for active sessions.
+- [x] **Episodic**: Qdrant/Postgres for recent interactions.
+- [x] **Long-Term**: Consolidated/Reinforced memories in Neo4j and PG.
+- [x] **Archive**: Cold storage (S3/Disk) for expired/low-importance memories.
 
 ### 4.2 Retrieval Explainability
-- [ ] **Scoring Metadata**: Update gRPC response to return a breakdown of the final score (Semantic %, Recency %, Importance %, Reinforcement %).
-- [ ] **Tracing**: Add OpenTelemetry spans to trace why a specific memory was selected.
+- [x] **Scoring Metadata**: Update gRPC response to return a breakdown of the final score (Semantic %, Recency %, Importance %, Reinforcement %).
+- [x] **Tracing**: Add OpenTelemetry spans to trace why a specific memory was selected.
 
 ---
 
