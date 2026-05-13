@@ -9,6 +9,7 @@ A comprehensive SDK for integrating Distributed MemOS into Node.js and Web appli
 - **Framework Integrations**: Built-in adapters for LangGraph, CrewAI, and AutoGen
 - **Explainable Retrieval**: Get detailed breakdowns of why memories were selected
 - **RLS Support**: Tenant and agent isolation with Row-Level Security
+- **Production Transport**: Real gRPC client for store and retrieve, plus health and metrics helpers
 
 ## Installation
 
@@ -136,25 +137,25 @@ Search for memories matching a query.
 
 Retrieve for multiple queries in parallel.
 
-#### `getMemory(memoryId: string, tenantId: string): Promise<Memory | null>`
-
-Get a specific memory by ID.
-
-#### `updateImportance(memoryId: string, importance: number, tenantId: string): Promise<void>`
-
-Update a memory's importance score.
-
-#### `deleteMemory(memoryId: string, tenantId: string): Promise<void>`
-
-Delete a memory.
-
 #### `getMetrics(): Promise<TelemetrySnapshot>`
 
-Get service metrics for observability.
+Fetch Prometheus metrics from the configured metrics endpoint, or the default `http://<endpoint>:9090/metrics`.
 
 #### `health(): Promise<boolean>`
 
-Check service health.
+Check gRPC readiness using the configured timeout.
+
+#### `getMemory(memoryId: string, tenantId: string): Promise<Memory | null>`
+
+This method currently throws `UnsupportedOperationError` because the gRPC service contract only exposes `Store` and `Retrieve`.
+
+#### `updateImportance(memoryId: string, importance: number, tenantId: string): Promise<void>`
+
+This method currently throws `UnsupportedOperationError` because the gRPC service contract only exposes `Store` and `Retrieve`.
+
+#### `deleteMemory(memoryId: string, tenantId: string): Promise<void>`
+
+This method currently throws `UnsupportedOperationError` because the gRPC service contract only exposes `Store` and `Retrieve`.
 
 ## Score Breakdown
 
