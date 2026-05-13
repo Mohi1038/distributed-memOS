@@ -8,6 +8,9 @@ import (
 	"time"
 
 	"github.com/mohi1038/memos/internal/storage"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // ReplicationManager handles asynchronous replication of memories across replicas.
