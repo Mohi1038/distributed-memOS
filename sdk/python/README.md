@@ -1,6 +1,6 @@
 # MemOS
 
-Distributed MemOS is a cognitive memory infrastructure designed for autonomous AI systems. It provides high-level features for managing and retrieving agent memory with human-like recall patterns.
+Distributed MemOS is a cognitive memory infrastructure designed for autonomous AI systems. It provides high-level features for managing and retrieving agent memory with adaptive recall patterns.
 
 --------------------------------------------------------------------------------
 
@@ -92,7 +92,7 @@ MemOS is optimized for low-latency cognitive retrieval across distributed nodes.
 To ensure transparency, these metrics are derived using the included benchmarking suite.
 - **Hardware**: Apple M2 Pro, 16GB RAM, Local Docker Cluster.
 - **Dataset**: 10,000 synthetic episodic memories with randomized importance and temporal distributions.
-- **Accuracy Measurement**: Calculated using a **Recall@5** test. "MemOS" accuracy is higher because it successfully surfaces "important" but "semantically distant" memories that standard vector search misses.
+- **Accuracy Measurement**: Calculated using a **Recall@5** test against the retrieval gold-standard benchmark. "MemOS" accuracy is higher because it surfaces important but semantically distant memories that standard vector search misses.
 - **Latency Measurement**: End-to-end gRPC round-trip time, measured over 1,000 requests.
 
 #### Run the Benchmarks
