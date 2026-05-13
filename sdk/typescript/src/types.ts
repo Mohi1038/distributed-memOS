@@ -80,6 +80,19 @@ export interface MemOSConfig {
   port: number;
   tlsEnabled?: boolean;
   credentials?: string;
+  rpcTimeoutMs?: number;
+  metricsUrl?: string;
+  logger?: Partial<SDKLogger>;
+}
+
+/**
+ * Optional logger interface for SDK observability hooks
+ */
+export interface SDKLogger {
+  debug: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
 }
 
 /**
@@ -88,9 +101,26 @@ export interface MemOSConfig {
 export interface TelemetrySnapshot {
   storeCount: number;
   retrieveCount: number;
-  cacheHits: number;
-  cacheMisses: number;
-  replicationLagMs: number;
-  avgStoreLatencyMs: number;
-  avgRetrieveLatencyMs: number;
+  auditWriteCount: number;
+  auditReadCount: number;
+  authDeniedCount: number;
+  cacheHitCount: number;
+  cacheMissCount: number;
+  cacheHitRate: number;
+  replicationLagAvgMs: number;
+  replicationLagMaxMs: number;
+  storeLatencyAvgMs: number;
+  retrieveLatencyAvgMs: number;
+  totalRequests: number;
+}
+
+/**
+ * Raised when the client API is asked to use a server capability that is not
+ * part of the current gRPC contract.
+ */
+export class UnsupportedOperationError extends Error {
+  constructor(operation: string) {
+    super(`${operation} is not supported by the current MemOS gRPC service contract`);
+    this.name = 'UnsupportedOperationError';
+  }
 }
