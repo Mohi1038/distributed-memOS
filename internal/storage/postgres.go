@@ -181,6 +181,64 @@ func (s *PostgresStore) EnsureDevPrincipal(ctx context.Context, tenantID, agentI
 	})
 }
 
+// CountMemories returns the total number of stored memories.
+func (s *PostgresStore) CountMemories(ctx context.Context) (int64, error) {
+	var count int64
+	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT COUNT(*) FROM memories`).Scan(&count)
+	})
+	return count, err
+}
+
+// CountDistinctAgents returns the number of agents that currently own memories.
+func (s *PostgresStore) CountDistinctAgents(ctx context.Context) (int64, error) {
+	var count int64
+	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT COUNT(DISTINCT agent_id) FROM memories WHERE agent_id IS NOT NULL`).Scan(&count)
+	})
+	return count, err
+}
+
+// GetRecentMemoriesForDashboard returns recent memories with content for dashboard visualizations.
+func (s *PostgresStore) GetRecentMemoriesForDashboard(ctx context.Context, limit int) ([]*MemoryModel, error) {
+	if limit <= 0 {
+		limit = 25
+	}
+	if limit > 200 {
+		limit = 200
+	}
+
+	var memories []*MemoryModel
+	err := s.withBypassSession(ctx, func(tx pgx.Tx) error {
+		query := `
+			SELECT id, tenant_id, agent_id, type, content, importance, metadata,
+			       last_accessed, retrieval_count, reinforcement_score, decay_factor, version,
+			       created_at, updated_at
+			FROM memories
+			ORDER BY updated_at DESC
+			LIMIT $1
+		`
+		rows, err := tx.Query(ctx, query, limit)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var m MemoryModel
+			if err := rows.Scan(&m.ID, &m.TenantID, &m.AgentID, &m.Type, &m.Content, &m.Importance, &m.Metadata, &m.LastAccessed, &m.RetrievalCount, &m.ReinforcementScore, &m.DecayFactor, &m.Version, &m.CreatedAt, &m.UpdatedAt); err != nil {
+				return err
+			}
+			memories = append(memories, &m)
+		}
+		return rows.Err()
+	})
+	if err != nil {
+		return nil, err
+	}
+	return memories, nil
+}
+
 // WriteAuditLog records an immutable audit trail entry.
 func (s *PostgresStore) WriteAuditLog(ctx context.Context, event *AuditLogModel) error {
 	return s.withTenantSession(ctx, uuid.UUID(event.TenantID.Bytes), func(tx pgx.Tx) error {
@@ -520,6 +578,7 @@ func (s *PostgresStore) DeleteMemory(ctx context.Context, id string) error {
 		return err
 	})
 }
+
 // IncrementRetrievalStats updates the last_accessed time and increments the count/reinforcement.
 func (s *PostgresStore) IncrementRetrievalStats(ctx context.Context, id string, reinforcementDelta float64) error {
 	return s.withBypassSession(ctx, func(tx pgx.Tx) error {
@@ -544,6 +603,7 @@ func (s *PostgresStore) UpdateDecayFactor(ctx context.Context, id string, factor
 		return err
 	})
 }
+
 // UpsertMemoryWithConflictResolution handles incoming memory updates from other nodes.
 // It uses the Version field to ensure causal consistency (LWW).
 func (s *PostgresStore) UpsertMemoryWithConflictResolution(ctx context.Context, m *MemoryModel) (bool, error) {
