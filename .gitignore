@@ -1,0 +1,63 @@
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.fleet/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Logs and temporary output
+*.log
+*.out
+*.tmp
+test_output.log
+
+# Build and coverage output
+bin/
+dist/
+build/
+coverage/
+out/
+*.coverprofile
+coverage.out
+
+# Go artifacts
+*.exe
+*.test
+
+# Node / TypeScript artifacts
+node_modules/
+sdk/typescript/node_modules/
+sdk/typescript/dist/
+sdk/typescript/coverage/
+sdk/typescript/.turbo/
+
+# Python packaging and virtualenv artifacts
+.pyc
+*.pyc
+**/__pycache__/
+sdk/python/venv_publish/
+sdk/python/dist/
+sdk/python/build/
+sdk/python/*.egg-info/
+sdk/python/**/__pycache__/
+sdk/python/**/*.pyc
+
+# Repository-local generated caches and mirrors
+github.com/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Release bundles and generated binaries
+releases/
