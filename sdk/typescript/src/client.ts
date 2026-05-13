@@ -3,15 +3,61 @@
  * Provides a high-level interface to Distributed MemOS
  */
 
+import fs from 'fs';
+import path from 'path';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 import {
   Memory,
   MemoryType,
   MemOSConfig,
+  SDKLogger,
+  UnsupportedOperationError,
   RetrieveOptions,
   ScoredMemory,
   StoreOptions,
   TelemetrySnapshot,
 } from './types';
+
+const noopLogger: SDKLogger = {
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: () => undefined,
+};
+
+type GrpcCallResponse = Record<string, unknown> & {
+  memory_id?: string;
+  success?: boolean;
+  memories?: Array<Record<string, unknown>>;
+};
+
+type MemoryServiceClient = grpc.Client & {
+  Store(
+    request: Record<string, unknown>,
+    callback: (error: grpc.ServiceError | null, response: GrpcCallResponse) => void
+  ): grpc.ClientUnaryCall;
+  Retrieve(
+    request: Record<string, unknown>,
+    callback: (error: grpc.ServiceError | null, response: GrpcCallResponse) => void
+  ): grpc.ClientUnaryCall;
+};
+
+type LoadedGrpcModule = {
+  memos?: {
+    v1?: {
+      MemoryService?: new (
+        address: string,
+        credentials: grpc.ChannelCredentials,
+        options?: grpc.ClientOptions
+      ) => MemoryServiceClient;
+    };
+  };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 /**
  * MemOS Client - Primary interface for memory operations
@@ -49,6 +95,8 @@ export class MemOSClient {
   private config: MemOSConfig;
   private endpoint: string;
   private port: number;
+  private logger: SDKLogger;
+  private grpcClient: MemoryServiceClient | null = null;
 
   /**
    * Initialize MemOS client
@@ -57,10 +105,15 @@ export class MemOSClient {
   constructor(config: MemOSConfig) {
     this.config = {
       tlsEnabled: false,
+      rpcTimeoutMs: 10000,
       ...config,
     };
     this.endpoint = this.config.endpoint;
     this.port = this.config.port;
+    this.logger = {
+      ...noopLogger,
+      ...this.config.logger,
+    };
   }
 
   /**
@@ -78,26 +131,27 @@ export class MemOSClient {
       metadata = {},
     } = options;
 
-    // TODO: Implement gRPC call to MemOS service
-    const request = {
-      tenant_id: tenantId,
-      agent_id: agentId,
-      type: type.replace('MEMORY_TYPE_', ''),
-      content,
-      importance,
-      metadata,
-    };
-
-    console.log('[MemOS SDK] Storing memory:', {
-      tenant: tenantId,
-      agent: agentId,
+    this.logger.debug('[MemOS SDK] Store request', {
+      tenantId,
+      agentId,
       contentLength: content.length,
       type,
       importance,
     });
 
-    // Placeholder: Replace with actual gRPC call
-    const memoryId = this.generateId();
+    const response = await this.callStore({
+      tenant_id: tenantId,
+      agent_id: agentId,
+      type: this.toGrpcMemoryType(type),
+      content,
+      importance,
+      metadata: this.toStruct(metadata),
+    });
+
+    const memoryId = this.readString(response, 'memory_id');
+    if (!memoryId) {
+      throw new Error('MemOS Store response did not include memory_id');
+    }
     return memoryId;
   }
 
@@ -118,8 +172,15 @@ export class MemOSClient {
       gammaImportance = 0.2,
     } = options;
 
-    // TODO: Implement gRPC call to MemOS service
-    const request = {
+    this.logger.debug('[MemOS SDK] Retrieve request', {
+      tenantId,
+      agentId,
+      query: query.substring(0, 100),
+      limit,
+      similarityThreshold,
+    });
+
+    const response = await this.callRetrieve({
       tenant_id: tenantId,
       agent_id: agentId,
       query,
@@ -128,17 +189,10 @@ export class MemOSClient {
       alpha_semantic: alphaSemantic,
       beta_temporal: betaTemporal,
       gamma_importance: gammaImportance,
-    };
-
-    console.log('[MemOS SDK] Retrieving memories:', {
-      tenant: tenantId,
-      agent: agentId,
-      query: query.substring(0, 100),
-      limit,
     });
 
-    // Placeholder: Replace with actual gRPC call
-    return [];
+    const memories = Array.isArray(response.memories) ? response.memories : [];
+    return memories.map((item) => this.toScoredMemory(item));
   }
 
   /**
@@ -160,11 +214,8 @@ export class MemOSClient {
    * @param tenantId Tenant ID (for RLS enforcement)
    * @returns Memory object
    */
-  async getMemory(memoryId: string, tenantId: string): Promise<Memory | null> {
-    console.log('[MemOS SDK] Getting memory:', { memoryId, tenantId });
-
-    // TODO: Implement gRPC call
-    return null;
+  async getMemory(_memoryId: string, _tenantId: string): Promise<Memory | null> {
+    throw new UnsupportedOperationError('getMemory');
   }
 
   /**
@@ -174,13 +225,11 @@ export class MemOSClient {
    * @param tenantId Tenant ID for RLS
    */
   async updateImportance(
-    memoryId: string,
-    importance: number,
-    tenantId: string
+    _memoryId: string,
+    _importance: number,
+    _tenantId: string
   ): Promise<void> {
-    console.log('[MemOS SDK] Updating importance:', { memoryId, importance, tenantId });
-
-    // TODO: Implement gRPC call
+    throw new UnsupportedOperationError('updateImportance');
   }
 
   /**
@@ -188,10 +237,8 @@ export class MemOSClient {
    * @param memoryId Memory ID to delete
    * @param tenantId Tenant ID for RLS
    */
-  async deleteMemory(memoryId: string, tenantId: string): Promise<void> {
-    console.log('[MemOS SDK] Deleting memory:', { memoryId, tenantId });
-
-    // TODO: Implement gRPC call
+  async deleteMemory(_memoryId: string, _tenantId: string): Promise<void> {
+    throw new UnsupportedOperationError('deleteMemory');
   }
 
   /**
@@ -199,18 +246,18 @@ export class MemOSClient {
    * @returns Telemetry snapshot
    */
   async getMetrics(): Promise<TelemetrySnapshot> {
-    console.log('[MemOS SDK] Fetching metrics');
+    const url = this.config.metricsUrl || `http://${this.endpoint}:9090/metrics`;
+    this.logger.debug('[MemOS SDK] Fetching metrics', { url });
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'text/plain',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch metrics from ${url}: ${response.status}`);
+    }
 
-    // TODO: Implement gRPC call to metrics endpoint
-    return {
-      storeCount: 0,
-      retrieveCount: 0,
-      cacheHits: 0,
-      cacheMisses: 0,
-      replicationLagMs: 0,
-      avgStoreLatencyMs: 0,
-      avgRetrieveLatencyMs: 0,
-    };
+    return this.parsePrometheusTelemetry(await response.text());
   }
 
   /**
@@ -219,8 +266,10 @@ export class MemOSClient {
    */
   async health(): Promise<boolean> {
     try {
-      console.log('[MemOS SDK] Health check:', `${this.endpoint}:${this.port}`);
-      // TODO: Implement health check
+      this.logger.debug('[MemOS SDK] Health check', {
+        address: this.getGrpcAddress(),
+      });
+      await this.waitForGrpcReady(this.config.rpcTimeoutMs ?? 10000);
       return true;
     } catch {
       return false;
@@ -231,19 +280,271 @@ export class MemOSClient {
    * Close client connection
    */
   close(): void {
-    console.log('[MemOS SDK] Closing client');
-    // TODO: Close gRPC connection
+    this.logger.debug('[MemOS SDK] Closing client');
+    this.grpcClient?.close();
+    this.grpcClient = null;
   }
 
-  /**
-   * Generate UUID for memory ID
-   */
-  private generateId(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
+  private getGrpcAddress(): string {
+    return `${this.endpoint}:${this.port}`;
+  }
+
+  private resolveProtoPath(): string {
+    const candidates = [
+      path.resolve(__dirname, '../proto/memory.proto'),
+      path.resolve(__dirname, '../../proto/memory.proto'),
+      path.resolve(process.cwd(), 'proto/memory.proto'),
+    ];
+
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+
+    throw new Error('Unable to locate memory.proto for the MemOS TypeScript SDK');
+  }
+
+  private resolveGoogleProtoRoot(): string | null {
+    try {
+      return path.dirname(require.resolve('protobufjs/package.json'));
+    } catch {
+      return null;
+    }
+  }
+
+  private getGrpcClient(): MemoryServiceClient {
+    if (this.grpcClient) {
+      return this.grpcClient;
+    }
+
+    const protoPath = this.resolveProtoPath();
+    const includeDirs = [path.dirname(protoPath)];
+    const googleProtoRoot = this.resolveGoogleProtoRoot();
+    if (googleProtoRoot) {
+      includeDirs.push(googleProtoRoot);
+    }
+
+    const packageDefinition = protoLoader.loadSync(protoPath, {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      arrays: true,
+      objects: true,
+      oneofs: true,
+      includeDirs,
     });
+
+    const loaded = grpc.loadPackageDefinition(packageDefinition) as LoadedGrpcModule;
+    const serviceCtor = loaded.memos?.v1?.MemoryService;
+    if (!serviceCtor) {
+      throw new Error('MemOS MemoryService is missing from the loaded proto definition');
+    }
+
+    const credentials = this.createCredentials();
+    this.grpcClient = new serviceCtor(this.getGrpcAddress(), credentials);
+    return this.grpcClient;
+  }
+
+  private createCredentials(): grpc.ChannelCredentials {
+    if (!this.config.tlsEnabled) {
+      return grpc.credentials.createInsecure();
+    }
+
+    if (!this.config.credentials) {
+      return grpc.credentials.createSsl();
+    }
+
+    const credentialPath = path.resolve(this.config.credentials);
+    const credentialBytes = fs.existsSync(credentialPath)
+      ? fs.readFileSync(credentialPath)
+      : Buffer.from(this.config.credentials, 'utf8');
+
+    return grpc.credentials.createSsl(credentialBytes);
+  }
+
+  private async waitForGrpcReady(timeoutMs: number): Promise<void> {
+    const client = this.getGrpcClient();
+    await new Promise<void>((resolve, reject) => {
+      const deadline = new Date(Date.now() + timeoutMs);
+      client.waitForReady(deadline, (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+
+  private async callStore(request: Record<string, unknown>): Promise<GrpcCallResponse> {
+    const client = this.getGrpcClient();
+    return await new Promise<GrpcCallResponse>((resolve, reject) => {
+      client.Store(request, this.toCallCallback(resolve, reject));
+    });
+  }
+
+  private async callRetrieve(request: Record<string, unknown>): Promise<GrpcCallResponse> {
+    const client = this.getGrpcClient();
+    return await new Promise<GrpcCallResponse>((resolve, reject) => {
+      client.Retrieve(request, this.toCallCallback(resolve, reject));
+    });
+  }
+
+  private toCallCallback(
+    resolve: (value: GrpcCallResponse) => void,
+    reject: (reason: unknown) => void
+  ): (error: grpc.ServiceError | null, response: GrpcCallResponse) => void {
+    return (error, response) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(response);
+    };
+  }
+
+  private toGrpcMemoryType(type: MemoryType): string {
+    return type;
+  }
+
+  private toStruct(value: Record<string, unknown>): Record<string, unknown> {
+    return JSON.parse(JSON.stringify(value ?? {})) as Record<string, unknown>;
+  }
+
+  private readString(value: GrpcCallResponse, key: 'memory_id' | 'memoryId'): string {
+    const result = value[key];
+    return typeof result === 'string' ? result : '';
+  }
+
+  private toMemoryType(value: unknown): MemoryType {
+    if (typeof value === 'string') {
+      if ((Object.values(MemoryType) as string[]).includes(value)) {
+        return value as MemoryType;
+      }
+      const prefixed = `MEMORY_TYPE_${value.replace(/^MEMORY_TYPE_/, '').toUpperCase()}`;
+      if ((Object.values(MemoryType) as string[]).includes(prefixed)) {
+        return prefixed as MemoryType;
+      }
+    }
+
+    switch (Number(value)) {
+      case 1:
+        return MemoryType.EPISODIC;
+      case 2:
+        return MemoryType.SEMANTIC;
+      case 3:
+        return MemoryType.PROCEDURAL;
+      case 4:
+        return MemoryType.REFLECTIVE;
+      case 5:
+        return MemoryType.TRANSIENT;
+      default:
+        return MemoryType.UNSPECIFIED;
+    }
+  }
+
+  private toDate(value: unknown): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+    if (typeof value === 'string' || typeof value === 'number') {
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? new Date(0) : parsed;
+    }
+    if (isRecord(value)) {
+      const seconds = Number(value.seconds ?? value._seconds ?? 0);
+      const nanos = Number(value.nanos ?? value._nanos ?? 0);
+      if (Number.isFinite(seconds)) {
+        return new Date(seconds * 1000 + nanos / 1_000_000);
+      }
+    }
+    return new Date(0);
+  }
+
+  private toMemory(value: unknown): Memory {
+    const record = isRecord(value) ? value : {};
+    const metadata = record.metadata;
+    return {
+      id: typeof record.id === 'string' ? record.id : '',
+      tenantId: typeof record.tenant_id === 'string' ? record.tenant_id : '',
+      agentId: typeof record.agent_id === 'string' ? record.agent_id : '',
+      type: this.toMemoryType(record.type),
+      content: typeof record.content === 'string' ? record.content : '',
+      embedding: Array.isArray(record.embedding)
+        ? record.embedding.map((item) => Number(item)).filter((item) => Number.isFinite(item))
+        : undefined,
+      importance: Number(record.importance ?? 0),
+      createdAt: this.toDate(record.created_at),
+      updatedAt: this.toDate(record.updated_at),
+      metadata: isRecord(metadata) ? metadata : undefined,
+    };
+  }
+
+  private toScoreBreakdown(value: unknown): {
+    semanticScore: number;
+    temporalScore: number;
+    importanceScore: number;
+    reinforcementScore: number;
+    layer: 'working' | 'episodic' | 'long_term' | 'archive';
+  } | undefined {
+    if (!isRecord(value)) {
+      return undefined;
+    }
+
+    const layer = typeof value.layer === 'string' ? value.layer : 'episodic';
+    const normalizedLayer = (['working', 'episodic', 'long_term', 'archive'] as const).includes(
+      layer as 'working' | 'episodic' | 'long_term' | 'archive'
+    )
+      ? (layer as 'working' | 'episodic' | 'long_term' | 'archive')
+      : 'episodic';
+
+    return {
+      semanticScore: Number(value.semantic_score ?? value.semanticScore ?? 0),
+      temporalScore: Number(value.temporal_score ?? value.temporalScore ?? 0),
+      importanceScore: Number(value.importance_score ?? value.importanceScore ?? 0),
+      reinforcementScore: Number(value.reinforcement_score ?? value.reinforcementScore ?? 0),
+      layer: normalizedLayer,
+    };
+  }
+
+  private toScoredMemory(value: unknown): ScoredMemory {
+    const record = isRecord(value) ? value : {};
+    return {
+      memory: this.toMemory(record.memory),
+      score: Number(record.score ?? 0),
+      breakdown: this.toScoreBreakdown(record.breakdown),
+    };
+  }
+
+  private parsePrometheusTelemetry(text: string): TelemetrySnapshot {
+    const getMetric = (name: string): number => {
+      const line = text.match(new RegExp(`^${name}\\s+([0-9.]+)$`, 'm'));
+      return line ? Number(line[1]) : 0;
+    };
+
+    const storeCount = getMetric('memos_store_requests_total');
+    const retrieveCount = getMetric('memos_retrieve_requests_total');
+    const cacheHitCount = getMetric('memos_cache_hits_total');
+    const cacheMissCount = getMetric('memos_cache_misses_total');
+    const totalCache = cacheHitCount + cacheMissCount;
+
+    return {
+      storeCount,
+      retrieveCount,
+      auditWriteCount: getMetric('memos_audit_writes_total'),
+      auditReadCount: getMetric('memos_audit_reads_total'),
+      authDeniedCount: getMetric('memos_auth_denied_total'),
+      cacheHitCount,
+      cacheMissCount,
+      cacheHitRate: totalCache > 0 ? (cacheHitCount / totalCache) * 100 : 0,
+      replicationLagAvgMs: getMetric('memos_replication_lag_ms_avg'),
+      replicationLagMaxMs: getMetric('memos_replication_lag_ms_max'),
+      storeLatencyAvgMs: getMetric('memos_store_latency_ms_avg'),
+      retrieveLatencyAvgMs: getMetric('memos_retrieve_latency_ms_avg'),
+      totalRequests: storeCount + retrieveCount,
+    };
   }
 }
 
