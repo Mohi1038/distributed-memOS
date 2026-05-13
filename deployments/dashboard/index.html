@@ -13,121 +13,191 @@
         }
 
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --primary-light: #a78bfa;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
+            --bg-primary: #06111f;
+            --bg-secondary: rgba(10, 17, 30, 0.88);
+            --bg-tertiary: rgba(18, 27, 46, 0.9);
+            --surface: rgba(15, 23, 42, 0.82);
+            --surface-strong: rgba(20, 29, 49, 0.95);
+            --border: rgba(148, 163, 184, 0.18);
+            --border-strong: rgba(167, 139, 250, 0.24);
+            --text-primary: #eef2ff;
             --text-secondary: #cbd5e1;
             --text-tertiary: #94a3b8;
-            --border: #334155;
-            --success: #10b981;
+            --primary: #8b5cf6;
+            --primary-strong: #6d28d9;
+            --primary-soft: rgba(139, 92, 246, 0.16);
+            --success: #22c55e;
             --warning: #f59e0b;
-            --error: #ef4444;
-            --surface-positive: rgba(16, 185, 129, 0.1);
-            --surface-warning: rgba(245, 158, 11, 0.1);
-            --surface-error: rgba(239, 68, 68, 0.1);
+            --danger: #ef4444;
+            --shadow-lg: 0 24px 60px rgba(2, 6, 23, 0.44);
+            --shadow-md: 0 16px 36px rgba(2, 6, 23, 0.28);
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        html {
+            background:
+                radial-gradient(circle at top left, rgba(139, 92, 246, 0.2), transparent 32%),
+                radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 26%),
+                linear-gradient(180deg, #020617 0%, var(--bg-primary) 42%, #030712 100%);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-primary);
+            min-height: 100vh;
             color: var(--text-primary);
-            line-height: 1.6;
+            font-family: "IBM Plex Sans", "Space Grotesk", "Segoe UI", sans-serif;
+            letter-spacing: 0.01em;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.2), transparent 28%),
+                radial-gradient(circle at 80% 10%, rgba(34, 197, 94, 0.12), transparent 20%),
+                linear-gradient(180deg, rgba(3, 7, 18, 0.92), rgba(6, 17, 31, 0.98));
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(148, 163, 184, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.025) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 85%);
         }
 
         .container {
             display: flex;
             height: 100vh;
-            overflow: hidden;
+            position: relative;
+            z-index: 1;
         }
 
         .sidebar {
-            width: 280px;
-            background-color: var(--bg-secondary);
+            width: 290px;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, rgba(8, 15, 28, 0.96), rgba(11, 18, 31, 0.92));
             border-right: 1px solid var(--border);
+            padding: 26px 22px;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
+            gap: 26px;
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
         }
 
         .logo {
-            font-size: 24px;
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 34px;
+            line-height: 1;
+            letter-spacing: -0.05em;
             font-weight: 700;
-            margin-bottom: 30px;
-            color: var(--primary-light);
-            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #d8b4fe 40%, #7dd3fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
         }
 
         .nav-section {
-            margin-bottom: 25px;
+            margin-bottom: 6px;
         }
 
         .nav-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
             color: var(--text-tertiary);
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            margin: 0 0 14px 10px;
         }
 
         .nav-item {
+            position: relative;
+            margin-bottom: 8px;
             padding: 12px 14px;
-            margin-bottom: 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
+            border-radius: 14px;
             color: var(--text-secondary);
-            font-size: 14px;
-            border-left: 3px solid transparent;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 180ms ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-item:hover {
-            background-color: var(--bg-tertiary);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--text-primary);
+            border-color: rgba(148, 163, 184, 0.12);
+            transform: translateX(2px);
         }
 
         .nav-item.active {
-            background-color: var(--primary);
-            color: white;
-            border-left-color: var(--primary-light);
+            color: #fff;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.12));
+            border-color: rgba(167, 139, 250, 0.3);
+            box-shadow: 0 10px 24px rgba(124, 58, 237, 0.18);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a78bfa, #38bdf8);
+            box-shadow: 0 0 18px rgba(167, 139, 250, 0.8);
         }
 
         .main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            min-width: 0;
         }
 
         .header {
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 20px 30px;
+            height: 82px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 28px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(5, 10, 20, 0.82);
+            backdrop-filter: blur(18px);
         }
 
         .header-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
         }
 
         .header-controls {
             display: flex;
-            gap: 12px;
             align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator,
+        .refresh-btn,
+        .pill,
+        .metric-card,
+        .insight-card,
+        .chart-container,
+        .table-container,
+        .agent-card,
+        .feed-item {
+            border: 1px solid var(--border);
         }
 
         .status-indicator {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text-secondary);
             font-size: 13px;
         }
 
@@ -135,114 +205,243 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--success);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            background: var(--success);
+            box-shadow: 0 0 18px rgba(34, 197, 94, 0.8);
         }
 
         .refresh-btn {
-            padding: 8px 16px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
+            border-radius: 14px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.24), rgba(59, 130, 246, 0.12));
+            color: var(--text-primary);
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: background-color 0.2s;
+            font: inherit;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
         }
 
         .refresh-btn:hover {
-            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            border-color: rgba(167, 139, 250, 0.34);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.34), rgba(59, 130, 246, 0.16));
         }
 
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 30px;
-            background-color: var(--bg-primary);
+            padding: 28px;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+            border-radius: 999px;
+            border: 2px solid rgba(15, 23, 42, 0.6);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            margin-bottom: 22px;
+            padding: 26px;
+            border-radius: var(--radius-lg);
+            background:
+                linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(15, 23, 42, 0.94) 42%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(6, 12, 24, 0.98));
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: auto -60px -60px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.18), transparent 66%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
+
+        .hero-copy {
+            max-width: 880px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            font-size: 15px;
+        }
+
+        .hero-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text-secondary);
+            font-size: 12px;
+            letter-spacing: 0.02em;
+            backdrop-filter: blur(10px);
+        }
+
+        .pill::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            box-shadow: 0 0 16px rgba(167, 139, 250, 0.8);
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
         }
 
         .metric-card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.2s;
+            grid-column: span 4;
+            padding: 18px 18px 16px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, rgba(20, 29, 49, 0.96), rgba(9, 14, 26, 0.98));
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 420ms ease both;
         }
 
-        .metric-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.95), rgba(56, 189, 248, 0.8));
         }
 
         .metric-label {
-            font-size: 13px;
             color: var(--text-tertiary);
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-size: 12px;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin-bottom: 10px;
         }
 
         .metric-value {
-            font-size: 28px;
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 34px;
             font-weight: 700;
-            color: var(--text-primary);
+            letter-spacing: -0.05em;
+            line-height: 1.05;
             margin-bottom: 8px;
         }
 
         .metric-change {
-            font-size: 12px;
-            color: var(--success);
-        }
-
-        .metric-change.negative {
-            color: var(--error);
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.4;
         }
 
         .section {
-            margin-bottom: 30px;
+            margin-bottom: 22px;
         }
 
         .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
             color: var(--text-primary);
         }
 
-        .chart-container {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            height: 300px;
-            position: relative;
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .insight-card {
+            min-height: 128px;
+            padding: 18px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, rgba(20, 29, 49, 0.96), rgba(10, 16, 29, 0.98));
+            box-shadow: var(--shadow-md);
+        }
+
+        .insight-label {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            margin-bottom: 10px;
+        }
+
+        .insight-value {
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+
+        .insight-help {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
         }
 
         .two-column {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-container,
+        .table-container {
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, rgba(20, 29, 49, 0.96), rgba(10, 16, 29, 0.98));
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .chart-container {
+            min-height: 320px;
+            padding: 18px;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: 280px !important;
         }
 
         .table-container {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
+            overflow: auto;
         }
 
         table {
@@ -250,79 +449,245 @@
             border-collapse: collapse;
         }
 
-        th {
-            background-color: var(--bg-tertiary);
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border);
-        }
-
+        th,
         td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
+            padding: 14px 16px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        th {
+            color: var(--text-tertiary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            background: rgba(15, 23, 42, 0.7);
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
-        tr:hover {
-            background-color: var(--bg-tertiary);
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tag-layer-working {
-            background-color: var(--surface-positive);
-            color: var(--success);
-        }
-
-        .tag-layer-episodic {
-            background-color: var(--primary);
-            background-color: rgba(124, 58, 237, 0.2);
-            color: var(--primary-light);
-        }
-
-        .tag-layer-longterm {
-            background-color: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
-
-        .tag-layer-archive {
-            background-color: var(--surface-warning);
-            color: var(--warning);
-        }
-
-        .score-bar {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            width: 100%;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            text-transform: capitalize;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .tag-layer-working { color: #67e8f9; border-color: rgba(103, 232, 249, 0.35); }
+        .tag-layer-episodic { color: #a78bfa; border-color: rgba(167, 139, 250, 0.35); }
+        .tag-layer-long_term { color: #34d399; border-color: rgba(52, 211, 153, 0.35); }
+        .tag-layer-archive { color: #fbbf24; border-color: rgba(251, 191, 36, 0.35); }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .score-bar-fill {
+            position: relative;
             flex: 1;
-            height: 6px;
-            background-color: var(--bg-tertiary);
-            border-radius: 3px;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.16);
+            border-radius: 999px;
             overflow: hidden;
         }
 
         .score-bar-inner {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.9), rgba(34, 197, 94, 0.85));
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .agent-card {
+            padding: 18px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, rgba(20, 29, 49, 0.96), rgba(10, 16, 29, 0.98));
+            box-shadow: var(--shadow-md);
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .agent-name {
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-weight: 700;
+        }
+
+        .agent-status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
+            font-size: 12px;
+        }
+
+        .agent-details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .agent-detail-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .agent-detail-value {
+            color: var(--text-primary);
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .feed-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .feed-item {
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(20, 29, 49, 0.94);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feed-meta {
+            color: var(--text-tertiary);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .empty-state {
+            color: var(--text-tertiary);
+            padding: 24px 18px;
+            text-align: center;
+        }
+
+        .empty-state-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1240px) {
+            .insight-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .metric-card {
+                grid-column: span 6;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 920px) {
+            body {
+                overflow: auto;
+            }
+
+            .container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 18px;
+            }
+
+            .main {
+                min-height: 0;
+            }
+
+            .header {
+                height: auto;
+                padding: 16px 18px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .content {
+                padding: 18px;
+            }
+
+            .hero {
+                padding: 20px;
+            }
+
+            .grid,
+            .insight-grid,
+            .agent-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-title {
+                font-size: 24px;
+            }
+
+            .metric-value {
+                font-size: 28px;
+            }
+
+            .hero-metadata {
+                gap: 8px;
+            }
+
+            .pill {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            th,
+            td {
+                padding: 12px 14px;
+            }
+        }
+            </script>
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--primary-light));
             border-radius: 3px;
@@ -510,16 +875,15 @@
 
             <div class="nav-section">
                 <div class="nav-label">Main</div>
-                <div class="nav-item active" onclick="switchView('dashboard')">Dashboard</div>
-                <div class="nav-item" onclick="switchView('agents')">Agents</div>
-                <div class="nav-item" onclick="switchView('memories')">Memories</div>
-                <div class="nav-item" onclick="switchView('performance')">Performance</div>
+                <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard', this)">Dashboard</div>
+                <div class="nav-item" data-view="agents" onclick="switchView('agents', this)">Agents</div>
+                <div class="nav-item" data-view="memories" onclick="switchView('memories', this)">Memories</div>
+                <div class="nav-item" data-view="performance" onclick="switchView('performance', this)">Performance</div>
             </div>
-
             <div class="nav-section">
                 <div class="nav-label">System</div>
-                <div class="nav-item" onclick="switchView('health')">System Health</div>
-                <div class="nav-item" onclick="switchView('settings')">Settings</div>
+                <div class="nav-item" data-view="health" onclick="switchView('health', this)">System Health</div>
+                <div class="nav-item" data-view="settings" onclick="switchView('settings', this)">Settings</div>
             </div>
         </div>
 
@@ -538,21 +902,35 @@
             <div class="content scrollbar" id="mainContent">
                 <!-- Dashboard View -->
                 <div id="dashboard-view">
+                    <div class="hero">
+                        <div>
+                            <div class="hero-title">MemOS live control center</div>
+                            <div class="hero-copy">
+                                Real-time memory infrastructure telemetry, retrieval quality, and agent activity are now powered by live API snapshots and WebSocket updates.
+                            </div>
+                            <div class="hero-metadata">
+                                <span class="pill" id="connection-pill">Connecting to metrics API</span>
+                                <span class="pill" id="snapshot-pill">Last snapshot: pending</span>
+                                <span class="pill" id="source-pill">Source: API + WebSocket</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid">
                         <div class="metric-card">
                             <div class="metric-label">Total Memories Stored</div>
                             <div class="metric-value" id="total-memories">0</div>
-                            <div class="metric-change">Fetching live data...</div>
+                            <div class="metric-change">Live database count</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-label">Store Operations (24h)</div>
                             <div class="metric-value" id="store-ops">0</div>
-                            <div class="metric-change" id="store-change">Waiting for data</div>
+                            <div class="metric-change" id="store-change">Live telemetry stream</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-label">Retrieve Operations (24h)</div>
                             <div class="metric-value" id="retrieve-ops">0</div>
-                            <div class="metric-change" id="retrieve-change">Waiting for data</div>
+                            <div class="metric-change" id="retrieve-change">Live telemetry stream</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-label">Cache Hit Rate</div>
@@ -562,12 +940,23 @@
                         <div class="metric-card">
                             <div class="metric-label">Avg Retrieval Latency</div>
                             <div class="metric-value" id="avg-latency">0ms</div>
-                            <div class="metric-change" id="latency-change">P95: 0ms</div>
+                            <div class="metric-change" id="latency-change">Rolling average</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-label">Active Agents</div>
                             <div class="metric-value" id="active-agents">0</div>
-                            <div class="metric-change">Real-time connected</div>
+                            <div class="metric-change">Distinct agents observed</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Live Insights</div>
+                        <div class="insight-grid" id="insight-cards">
+                            <div class="insight-card">
+                                <div class="insight-label">Connection</div>
+                                <div class="insight-value">Waiting for API</div>
+                                <div class="insight-help">The dashboard will switch to live data as soon as the metrics service responds.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -767,116 +1156,222 @@
     </div>
 
     <script>
-        let charts = {};
-        let currentView = 'dashboard';
-        let refreshInterval = 10000;
+        const state = {
+            apiBaseUrl: new URLSearchParams(window.location.search).get('api') || 'http://localhost:9090',
+            ws: null,
+            reconnectTimer: null,
+            pollTimer: null,
+            history: [],
+            snapshot: null,
+            charts: {}
+        };
 
-        function generateMockMetrics() {
-            return {
-                totalMemories: Math.floor(Math.random() * 5000) + 10000,
-                storeOps24h: Math.floor(Math.random() * 2000) + 5000,
-                retrieveOps24h: Math.floor(Math.random() * 3000) + 8000,
-                cacheHitRate: Math.floor(Math.random() * 20) + 65,
-                avgLatency: Math.floor(Math.random() * 50) + 45,
-                p95Latency: Math.floor(Math.random() * 80) + 120,
-                p99Latency: Math.floor(Math.random() * 150) + 200,
-                activeAgents: Math.floor(Math.random() * 15) + 5,
-                throughput: Math.floor(Math.random() * 500) + 1000,
-                memoryDistribution: {
-                    working: Math.floor(Math.random() * 500) + 200,
-                    episodic: Math.floor(Math.random() * 3000) + 3000,
-                    longterm: Math.floor(Math.random() * 2000) + 2000,
-                    archive: Math.floor(Math.random() * 500) + 100
+        function endpoint(path) {
+            return `${state.apiBaseUrl}${path}`;
+        }
+
+        async function fetchJson(url) {
+            const response = await fetch(url, {
+                headers: {
+                    Accept: 'application/json'
                 }
+            });
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function websocketUrl() {
+            return state.apiBaseUrl.replace(/^http/, 'ws') + '/api/dashboard/stream';
+        }
+
+        function shortPreview(text) {
+            if (!text) {
+                return 'No content available';
+            }
+            return text.length > 88 ? `${text.slice(0, 88)}...` : text;
+        }
+
+        function normalizeCountSeries(items, fallbackLabels) {
+            const map = new Map((items || []).map(item => [item.label, item.value]));
+            return fallbackLabels.map(label => map.get(label) || 0);
+        }
+
+        function updateConnectionState(text, tone) {
+            const pill = document.getElementById('connection-pill');
+            if (!pill) {
+                return;
+            }
+            pill.textContent = text;
+            pill.style.borderColor = tone === 'good' ? 'rgba(16, 185, 129, 0.5)' : tone === 'warn' ? 'rgba(245, 158, 11, 0.5)' : 'rgba(148, 163, 184, 0.25)';
+            pill.style.color = tone === 'good' ? '#10b981' : tone === 'warn' ? '#f59e0b' : 'var(--text-secondary)';
+        }
+
+        function setSnapshotStamp(snapshot) {
+            const pill = document.getElementById('snapshot-pill');
+            if (pill) {
+                pill.textContent = `Last snapshot: ${new Date(snapshot.generatedAt).toLocaleTimeString()}`;
+            }
+        }
+
+        function fallbackSnapshot() {
+            const now = new Date();
+            return {
+                generatedAt: now.toISOString(),
+                metrics: {
+                    totalMemories: 0,
+                    activeAgents: 0,
+                    storeOps: 0,
+                    retrieveOps: 0,
+                    auditWrites: 0,
+                    auditReads: 0,
+                    cacheHitRate: 0,
+                    storeLatencyAvgMs: 0,
+                    retrieveLatencyAvgMs: 0,
+                    replicationLagAvgMs: 0,
+                    replicationLagMaxMs: 0,
+                    liveRetrievals: 0
+                },
+                memoryTypes: [],
+                memoryLayers: [],
+                recentMemories: [],
+                agents: [],
+                activityByHour: Array.from({ length: 24 }, () => 0),
+                insights: ['Waiting for live data from the metrics API.'],
+                health: { status: 'degraded', database: 'unknown', vector: 'unknown', graph: 'unknown', metrics: 'unknown' },
+                feed: []
             };
         }
 
-        function generateTopMemories() {
-            const layers = ['working', 'episodic', 'longterm', 'archive'];
-            const memories = [];
-            for (let i = 0; i < 5; i++) {
-                memories.push({
-                    preview: `User preference ${i + 1}: Important context about...`,
-                    layer: layers[Math.floor(Math.random() * layers.length)],
-                    score: (Math.random() * 0.3 + 0.7).toFixed(2),
-                    accessCount: Math.floor(Math.random() * 100) + 10,
-                    lastAccessed: `${Math.floor(Math.random() * 60)}m ago`
-                });
+        function parsePrometheusMetrics(text) {
+            const parseValue = (name) => {
+                const match = text.match(new RegExp(`^${name}\\s+([0-9.]+)$`, 'm'));
+                return match ? Number(match[1]) : 0;
+            };
+            return {
+                store: parseValue('memos_store_requests_total'),
+                retrieve: parseValue('memos_retrieve_requests_total'),
+                storeLatency: parseValue('memos_store_latency_ms_avg'),
+                retrieveLatency: parseValue('memos_retrieve_latency_ms_avg')
+            };
+        }
+
+        function pushHistory(snapshot) {
+            const metrics = snapshot.metrics || {};
+            const last = state.history[state.history.length - 1];
+            const item = {
+                time: snapshot.generatedAt,
+                storeOps: metrics.storeOps || 0,
+                retrieveOps: metrics.retrieveOps || 0,
+                retrieveLatency: metrics.retrieveLatencyAvgMs || 0,
+                replicationLag: metrics.replicationLagMaxMs || 0
+            };
+            if (last) {
+                item.deltaStore = Math.max(0, item.storeOps - last.storeOps);
+                item.deltaRetrieve = Math.max(0, item.retrieveOps - last.retrieveOps);
+            } else {
+                item.deltaStore = item.storeOps;
+                item.deltaRetrieve = item.retrieveOps;
             }
-            return memories;
-        }
-
-        function generateAgents() {
-            const agents = [];
-            const numAgents = Math.floor(Math.random() * 8) + 3;
-            for (let i = 0; i < numAgents; i++) {
-                agents.push({
-                    id: `agent-${Math.random().toString(36).substr(2, 9)}`,
-                    name: `Agent ${i + 1}`,
-                    status: 'connected',
-                    memoriesStored: Math.floor(Math.random() * 1000) + 100,
-                    memoriesRetrieved: Math.floor(Math.random() * 2000) + 500,
-                    lastActivity: `${Math.floor(Math.random() * 30)}s ago`
-                });
+            state.history.push(item);
+            if (state.history.length > 24) {
+                state.history.shift();
             }
-            return agents;
         }
 
-        function updateDashboard() {
-            const metrics = generateMockMetrics();
-
-            document.getElementById('total-memories').textContent = metrics.totalMemories.toLocaleString();
-            document.getElementById('store-ops').textContent = metrics.storeOps24h.toLocaleString();
-            document.getElementById('retrieve-ops').textContent = metrics.retrieveOps24h.toLocaleString();
-            document.getElementById('cache-hit').textContent = metrics.cacheHitRate + '%';
-            document.getElementById('avg-latency').textContent = metrics.avgLatency + 'ms';
-            document.getElementById('p95-latency').textContent = metrics.p95Latency + 'ms';
-            document.getElementById('active-agents').textContent = metrics.activeAgents;
-
-            document.getElementById('perf-p50').textContent = metrics.avgLatency + 'ms';
-            document.getElementById('perf-p95').textContent = metrics.p95Latency + 'ms';
-            document.getElementById('perf-p99').textContent = metrics.p99Latency + 'ms';
-            document.getElementById('perf-throughput').textContent = metrics.throughput.toLocaleString();
-
-            document.getElementById('memory-working').textContent = metrics.memoryDistribution.working.toLocaleString();
-            document.getElementById('memory-episodic').textContent = metrics.memoryDistribution.episodic.toLocaleString();
-            document.getElementById('memory-longterm').textContent = metrics.memoryDistribution.longterm.toLocaleString();
-            document.getElementById('memory-archive').textContent = metrics.memoryDistribution.archive.toLocaleString();
-
-            updateTopMemories();
-            updateAgentsList();
-            updateCharts(metrics);
+        function renderMetricCards(snapshot) {
+            const metrics = snapshot.metrics || {};
+            document.getElementById('total-memories').textContent = (metrics.totalMemories || 0).toLocaleString();
+            document.getElementById('store-ops').textContent = (metrics.storeOps || 0).toLocaleString();
+            document.getElementById('retrieve-ops').textContent = (metrics.retrieveOps || 0).toLocaleString();
+            document.getElementById('cache-hit').textContent = `${Number(metrics.cacheHitRate || 0).toFixed(1)}%`;
+            document.getElementById('avg-latency').textContent = `${Number(metrics.retrieveLatencyAvgMs || 0).toFixed(1)}ms`;
+            document.getElementById('active-agents').textContent = (metrics.activeAgents || 0).toLocaleString();
+            document.getElementById('perf-p50').textContent = `${Number(metrics.storeLatencyAvgMs || 0).toFixed(1)}ms`;
+            document.getElementById('perf-p95').textContent = `${Number(metrics.retrieveLatencyAvgMs || 0).toFixed(1)}ms`;
+            document.getElementById('perf-p99').textContent = `${Number(metrics.replicationLagMaxMs || 0).toFixed(1)}ms`;
+            document.getElementById('perf-throughput').textContent = `${(metrics.storeOps || 0) + (metrics.retrieveOps || 0)}`;
+            document.getElementById('memory-working').textContent = snapshot.memoryLayers?.find(item => item.label === 'working')?.value?.toLocaleString() || '0';
+            document.getElementById('memory-episodic').textContent = snapshot.memoryLayers?.find(item => item.label === 'episodic')?.value?.toLocaleString() || '0';
+            document.getElementById('memory-longterm').textContent = snapshot.memoryLayers?.find(item => item.label === 'long_term')?.value?.toLocaleString() || '0';
+            document.getElementById('memory-archive').textContent = snapshot.memoryLayers?.find(item => item.label === 'archive')?.value?.toLocaleString() || '0';
         }
 
-        function updateTopMemories() {
-            const memories = generateTopMemories();
+        function renderInsights(snapshot) {
+            const cards = document.getElementById('insight-cards');
+            if (!cards) {
+                return;
+            }
+            const metrics = snapshot.metrics || {};
+            const insights = snapshot.insights || [];
+            cards.innerHTML = [
+                {
+                    label: 'Cache efficiency',
+                    value: `${Number(metrics.cacheHitRate || 0).toFixed(1)}%`,
+                    help: 'Higher cache hit rate reduces retrieval pressure on the vector and graph layers.'
+                },
+                {
+                    label: 'Retrieval latency',
+                    value: `${Number(metrics.retrieveLatencyAvgMs || 0).toFixed(1)}ms`,
+                    help: 'Average end-to-end retrieval latency from the live metrics stream.'
+                },
+                {
+                    label: 'Agent coverage',
+                    value: `${(metrics.activeAgents || 0).toLocaleString()} agents`,
+                    help: 'Distinct active agents observed in the recent memory sample.'
+                },
+                {
+                    label: 'Dominant insight',
+                    value: insights[0] || 'Waiting for live data',
+                    help: insights[1] || 'Additional commentary appears as the WebSocket stream updates.'
+                }
+            ].map(block => `
+                <div class="insight-card">
+                    <div class="insight-label">${block.label}</div>
+                    <div class="insight-value">${block.value}</div>
+                    <div class="insight-help">${block.help}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderTopMemories(snapshot) {
             const tbody = document.getElementById('top-memories');
-            tbody.innerHTML = memories.map(mem => `
+            const memories = snapshot.recentMemories || [];
+            if (!tbody) {
+                return;
+            }
+            if (memories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No live memories yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = memories.slice(0, 5).map(memory => `
                 <tr>
-                    <td>${mem.preview}</td>
-                    <td><span class="tag tag-layer-${mem.layer}">${mem.layer}</span></td>
+                    <td>${shortPreview(memory.preview)}</td>
+                    <td><span class="tag tag-layer-${memory.layer}">${memory.layer}</span></td>
                     <td>
                         <div class="score-bar">
-                            <div class="score-bar-fill">
-                                <div class="score-bar-inner" style="width: ${mem.score * 100}%"></div>
-                            </div>
-                            <span>${mem.score}</span>
+                            <div class="score-bar-fill"><div class="score-bar-inner" style="width: ${Math.min(100, Math.round(memory.score * 100))}%"></div></div>
+                            <span>${Number(memory.score).toFixed(2)}</span>
                         </div>
                     </td>
-                    <td>${mem.accessCount}</td>
-                    <td>${mem.lastAccessed}</td>
+                    <td>${memory.accessCount}</td>
+                    <td>${memory.lastAccessed}</td>
                 </tr>
             `).join('');
         }
 
-        function updateAgentsList() {
-            const agents = generateAgents();
+        function renderAgents(snapshot) {
             const container = document.getElementById('agents-list');
+            const agents = snapshot.agents || [];
+            if (!container) {
+                return;
+            }
             if (agents.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-title">No agents connected</div>
-                        <div>Agents will appear here when they connect to MemOS</div>
+                        <div class="empty-state-title">No agents observed</div>
+                        <div>Agents will appear once memory activity is attributed to them.</div>
                     </div>
                 `;
                 return;
@@ -885,252 +1380,368 @@
                 <div class="agent-card">
                     <div class="agent-header">
                         <span class="agent-name">${agent.name}</span>
-                        <span class="agent-status">Connected</span>
+                        <span class="agent-status">Live</span>
                     </div>
                     <div class="agent-details">
-                        <div class="agent-detail-item">
-                            Stored: <span class="agent-detail-value">${agent.memoriesStored.toLocaleString()}</span>
-                        </div>
-                        <div class="agent-detail-item">
-                            Retrieved: <span class="agent-detail-value">${agent.memoriesRetrieved.toLocaleString()}</span>
-                        </div>
-                        <div class="agent-detail-item">
-                            ID: <span class="agent-detail-value">${agent.id}</span>
-                        </div>
-                        <div class="agent-detail-item">
-                            Last activity: <span class="agent-detail-value">${agent.lastActivity}</span>
-                        </div>
+                        <div class="agent-detail-item">Memories: <span class="agent-detail-value">${agent.memories.toLocaleString()}</span></div>
+                        <div class="agent-detail-item">Last activity: <span class="agent-detail-value">${agent.lastActivity}</span></div>
+                        <div class="agent-detail-item">Agent ID: <span class="agent-detail-value">${agent.id}</span></div>
+                        <div class="agent-detail-item">Source: <span class="agent-detail-value">live snapshot</span></div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function updateCharts(metrics) {
-            if (charts.throughput) {
-                charts.throughput.data.labels = Array.from({length: 24}, (_, i) => `${i}:00`);
-                charts.throughput.data.datasets[0].data = Array.from({length: 24}, () => 
-                    Math.floor(Math.random() * 500) + 800
-                );
-                charts.throughput.update();
-            } else {
+        function renderEventFeed(snapshot) {
+            const tbody = document.getElementById('event-feed');
+            const feed = snapshot.feed || [];
+            if (!tbody) {
+                return;
+            }
+            if (feed.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Waiting for live updates...</td></tr>';
+                return;
+            }
+            tbody.innerHTML = feed.map(event => `
+                <tr>
+                    <td>${event.label}</td>
+                    <td>${event.meta}</td>
+                    <td>${event.timestamp}</td>
+                </tr>
+            `).join('');
+        }
+
+        function normalizeCounts(items, labels) {
+            const map = new Map((items || []).map(item => [item.label, item.value]));
+            return labels.map(label => map.get(label) || 0);
+        }
+
+        function qualityScore(snapshot) {
+            const metrics = snapshot.metrics || {};
+            const values = (snapshot.memoryLayers || []).map(item => item.value || 0);
+            const total = values.reduce((sum, value) => sum + value, 0) || 1;
+            const balance = 1 - (Math.max(...values, 1) - Math.min(...values, 0)) / total;
+            const cache = Math.min(1, (metrics.cacheHitRate || 0) / 100);
+            const latency = 1 - Math.min(1, (metrics.retrieveLatencyAvgMs || 0) / 500);
+            const freshness = Math.min(1, (snapshot.activityByHour || []).slice(-6).reduce((sum, value) => sum + value, 0) / 40);
+            const throughput = Math.min(1, ((metrics.storeOps || 0) + (metrics.retrieveOps || 0)) / 20000);
+            return [
+                Math.round(cache * 100),
+                Math.round(Math.max(0, balance) * 100),
+                Math.round(latency * 100),
+                Math.round(freshness * 100),
+                Math.round(throughput * 100)
+            ];
+        }
+
+        function chartBaseOptions(showLegend) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: showLegend,
+                        labels: { color: 'rgb(241, 245, 249)' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(51, 65, 85, 0.22)' },
+                        ticks: { color: 'rgb(148, 163, 184)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgb(148, 163, 184)' }
+                    }
+                }
+            };
+        }
+
+        function renderCharts(snapshot) {
+            const labels24 = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+            const history = state.history.slice(-24);
+            const storeSeries = history.map(item => item.deltaStore ?? 0);
+            const retrieveSeries = history.map(item => item.deltaRetrieve ?? 0);
+
+            const layerLabels = ['working', 'episodic', 'long_term', 'archive'];
+            const typeLabels = ['episodic', 'semantic', 'procedural', 'reflective', 'transient'];
+
+            if (!state.charts.throughput) {
                 const throughputCtx = document.getElementById('throughputChart')?.getContext('2d');
                 if (throughputCtx) {
-                    charts.throughput = new Chart(throughputCtx, {
+                    state.charts.throughput = new Chart(throughputCtx, {
                         type: 'line',
                         data: {
-                            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-                            datasets: [{
-                                label: 'Operations/sec',
-                                data: Array.from({length: 24}, () => Math.floor(Math.random() * 500) + 800),
-                                borderColor: 'rgb(124, 58, 237)',
-                                backgroundColor: 'rgba(124, 58, 237, 0.1)',
-                                borderWidth: 2,
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(51, 65, 85, 0.2)' },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
+                            labels: labels24,
+                            datasets: [
+                                {
+                                    label: 'Store delta',
+                                    data: storeSeries,
+                                    borderColor: 'rgb(124, 58, 237)',
+                                    backgroundColor: 'rgba(124, 58, 237, 0.14)',
+                                    tension: 0.35,
+                                    fill: true
                                 },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
+                                {
+                                    label: 'Retrieve delta',
+                                    data: retrieveSeries,
+                                    borderColor: 'rgb(16, 185, 129)',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                                    tension: 0.35,
+                                    fill: true
                                 }
-                            }
-                        }
+                            ]
+                        },
+                        options: chartBaseOptions(true)
                     });
                 }
+            } else {
+                state.charts.throughput.data.labels = labels24;
+                state.charts.throughput.data.datasets[0].data = storeSeries;
+                state.charts.throughput.data.datasets[1].data = retrieveSeries;
+                state.charts.throughput.update();
             }
 
-            if (charts.distribution) {
-                charts.distribution.data.datasets[0].data = [
-                    metrics.memoryDistribution.working,
-                    metrics.memoryDistribution.episodic,
-                    metrics.memoryDistribution.longterm,
-                    metrics.memoryDistribution.archive
-                ];
-                charts.distribution.update();
-            } else {
+            if (!state.charts.distribution) {
                 const distributionCtx = document.getElementById('distributionChart')?.getContext('2d');
                 if (distributionCtx) {
-                    charts.distribution = new Chart(distributionCtx, {
+                    state.charts.distribution = new Chart(distributionCtx, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Working', 'Episodic', 'Long-term', 'Archive'],
+                            labels: layerLabels,
                             datasets: [{
-                                data: [
-                                    metrics.memoryDistribution.working,
-                                    metrics.memoryDistribution.episodic,
-                                    metrics.memoryDistribution.longterm,
-                                    metrics.memoryDistribution.archive
-                                ],
-                                backgroundColor: [
-                                    'rgb(16, 185, 129)',
-                                    'rgb(124, 58, 237)',
-                                    'rgb(59, 130, 246)',
-                                    'rgb(245, 158, 11)'
-                                ]
+                                data: normalizeCounts(snapshot.memoryLayers, layerLabels),
+                                backgroundColor: ['rgb(16, 185, 129)', 'rgb(124, 58, 237)', 'rgb(59, 130, 246)', 'rgb(245, 158, 11)']
                             }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { 
-                                    display: true,
-                                    labels: { color: 'rgb(241, 245, 249)' }
-                                }
-                            }
-                        }
+                        options: chartBaseOptions(true)
                     });
                 }
+            } else {
+                state.charts.distribution.data.datasets[0].data = normalizeCounts(snapshot.memoryLayers, layerLabels);
+                state.charts.distribution.update();
             }
 
-            if (charts.latency) {
-                charts.latency.data.datasets[0].data = Array.from({length: 10}, () => 
-                    Math.floor(Math.random() * 100) + 50
-                );
-                charts.latency.update();
-            } else {
+            if (!state.charts.latency) {
                 const latencyCtx = document.getElementById('latencyChart')?.getContext('2d');
                 if (latencyCtx) {
-                    charts.latency = new Chart(latencyCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: Array.from({length: 10}, (_, i) => `${i * 50}-${(i + 1) * 50}ms`),
-                            datasets: [{
-                                label: 'Request Count',
-                                data: Array.from({length: 10}, () => Math.floor(Math.random() * 100) + 50),
-                                backgroundColor: 'rgb(124, 58, 237)',
-                                borderRadius: 4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(51, 65, 85, 0.2)' },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
-                                },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            if (charts.replication) {
-                charts.replication.data.datasets[0].data = Array.from({length: 24}, () => 
-                    Math.floor(Math.random() * 30) + 10
-                );
-                charts.replication.update();
-            } else {
-                const replicationCtx = document.getElementById('replicationChart')?.getContext('2d');
-                if (replicationCtx) {
-                    charts.replication = new Chart(replicationCtx, {
+                    state.charts.latency = new Chart(latencyCtx, {
                         type: 'line',
                         data: {
-                            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                            labels: labels24,
                             datasets: [{
-                                label: 'Lag (ms)',
-                                data: Array.from({length: 24}, () => Math.floor(Math.random() * 30) + 10),
-                                borderColor: 'rgb(16, 185, 129)',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                borderWidth: 2,
-                                tension: 0.4,
+                                label: 'Avg retrieval latency',
+                                data: history.map(item => item.retrieveLatency ?? 0),
+                                borderColor: 'rgb(239, 68, 68)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                                tension: 0.3,
                                 fill: true
                             }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(51, 65, 85, 0.2)' },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
-                                },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { color: 'rgb(148, 163, 184)' }
-                                }
-                            }
-                        }
+                        options: chartBaseOptions(false)
                     });
                 }
+            } else {
+                state.charts.latency.data.labels = labels24;
+                state.charts.latency.data.datasets[0].data = history.map(item => item.retrieveLatency ?? 0);
+                state.charts.latency.update();
             }
 
-            if (charts.memoryType) {
-                charts.memoryType.data.datasets[0].data = [
-                    Math.floor(Math.random() * 3000) + 2000,
-                    Math.floor(Math.random() * 2000) + 1500,
-                    Math.floor(Math.random() * 1500) + 1000,
-                    Math.floor(Math.random() * 1000) + 500
-                ];
-                charts.memoryType.update();
+            if (!state.charts.replication) {
+                const replicationCtx = document.getElementById('replicationChart')?.getContext('2d');
+                if (replicationCtx) {
+                    state.charts.replication = new Chart(replicationCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels24,
+                            datasets: [{
+                                label: 'Replication lag',
+                                data: history.map(item => item.replicationLag ?? 0),
+                                backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: chartBaseOptions(false)
+                    });
+                }
             } else {
+                state.charts.replication.data.labels = labels24;
+                state.charts.replication.data.datasets[0].data = history.map(item => item.replicationLag ?? 0);
+                state.charts.replication.update();
+            }
+
+            if (!state.charts.memoryType) {
                 const memoryTypeCtx = document.getElementById('memoryTypeChart')?.getContext('2d');
                 if (memoryTypeCtx) {
-                    charts.memoryType = new Chart(memoryTypeCtx, {
-                        type: 'pie',
+                    state.charts.memoryType = new Chart(memoryTypeCtx, {
+                        type: 'bar',
                         data: {
-                            labels: ['Episodic', 'Semantic', 'Procedural', 'Reflective'],
+                            labels: typeLabels,
                             datasets: [{
-                                data: [
-                                    Math.floor(Math.random() * 3000) + 2000,
-                                    Math.floor(Math.random() * 2000) + 1500,
-                                    Math.floor(Math.random() * 1500) + 1000,
-                                    Math.floor(Math.random() * 1000) + 500
-                                ],
-                                backgroundColor: [
-                                    'rgb(124, 58, 237)',
-                                    'rgb(59, 130, 246)',
-                                    'rgb(16, 185, 129)',
-                                    'rgb(245, 158, 11)'
-                                ]
+                                label: 'Memory type mix',
+                                data: normalizeCounts(snapshot.memoryTypes, typeLabels),
+                                backgroundColor: ['rgb(124, 58, 237)', 'rgb(59, 130, 246)', 'rgb(16, 185, 129)', 'rgb(245, 158, 11)', 'rgb(148, 163, 184)']
+                            }]
+                        },
+                        options: chartBaseOptions(false)
+                    });
+                }
+            } else {
+                state.charts.memoryType.data.datasets[0].data = normalizeCounts(snapshot.memoryTypes, typeLabels);
+                state.charts.memoryType.update();
+            }
+
+            if (!state.charts.quality) {
+                const qualityCtx = document.getElementById('qualityChart')?.getContext('2d');
+                if (qualityCtx) {
+                    state.charts.quality = new Chart(qualityCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Cache', 'Balance', 'Latency', 'Freshness', 'Throughput'],
+                            datasets: [{
+                                label: 'Live quality score',
+                                data: qualityScore(snapshot),
+                                borderColor: 'rgb(167, 139, 250)',
+                                backgroundColor: 'rgba(124, 58, 237, 0.18)',
+                                pointBackgroundColor: 'rgb(167, 139, 250)'
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: {
-                                legend: { 
-                                    display: true,
-                                    labels: { color: 'rgb(241, 245, 249)' }
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                                    angleLines: { color: 'rgba(51, 65, 85, 0.45)' },
+                                    pointLabels: { color: 'rgb(241, 245, 249)' },
+                                    ticks: { color: 'rgb(148, 163, 184)', backdropColor: 'transparent' }
                                 }
+                            },
+                            plugins: {
+                                legend: { labels: { color: 'rgb(241, 245, 249)' } }
                             }
                         }
                     });
                 }
+            } else {
+                state.charts.quality.data.datasets[0].data = qualityScore(snapshot);
+                state.charts.quality.update();
             }
         }
 
-        function switchView(viewName) {
+        async function loadSnapshot() {
+            try {
+                const snapshot = await fetchJson(endpoint('/api/dashboard/summary'));
+                state.snapshot = snapshot;
+                pushHistory(snapshot);
+                updateConnectionState('Live API connected', 'good');
+                setSnapshotStamp(snapshot);
+                renderMetricCards(snapshot);
+                renderInsights(snapshot);
+                renderTopMemories(snapshot);
+                renderAgents(snapshot);
+                renderEventFeed(snapshot);
+                renderCharts(snapshot);
+                document.getElementById('source-pill').textContent = 'Source: API + WebSocket';
+                return snapshot;
+            } catch (error) {
+                console.warn('Dashboard API snapshot unavailable, falling back to Prometheus text', error);
+                updateConnectionState('API fallback active', 'warn');
+                const fallback = fallbackSnapshot();
+                setSnapshotStamp(fallback);
+                renderMetricCards(fallback);
+                renderInsights(fallback);
+                renderTopMemories(fallback);
+                renderAgents(fallback);
+                renderEventFeed(fallback);
+                renderCharts(fallback);
+                try {
+                    const response = await fetch(endpoint('/metrics'));
+                    if (response.ok) {
+                        const metrics = parsePrometheusMetrics(await response.text());
+                        document.getElementById('store-change').textContent = `Store ops: ${metrics.store}`;
+                        document.getElementById('retrieve-change').textContent = `Retrieve ops: ${metrics.retrieve}`;
+                        document.getElementById('latency-change').textContent = `Avg store latency: ${metrics.storeLatency.toFixed(1)}ms`;
+                    }
+                } catch (fallbackError) {
+                    console.warn('Prometheus fallback unavailable', fallbackError);
+                }
+                return fallback;
+            }
+        }
+
+        function connectWebSocket() {
+            try {
+                if (state.ws) {
+                    state.ws.close();
+                }
+                const socket = new WebSocket(websocketUrl());
+                state.ws = socket;
+
+                socket.onopen = () => {
+                    updateConnectionState('WebSocket live', 'good');
+                    if (state.pollTimer) {
+                        clearInterval(state.pollTimer);
+                        state.pollTimer = null;
+                    }
+                };
+
+                socket.onmessage = (event) => {
+                    try {
+                        const snapshot = JSON.parse(event.data);
+                        state.snapshot = snapshot;
+                        pushHistory(snapshot);
+                        setSnapshotStamp(snapshot);
+                        renderMetricCards(snapshot);
+                        renderInsights(snapshot);
+                        renderTopMemories(snapshot);
+                        renderAgents(snapshot);
+                        renderEventFeed(snapshot);
+                        renderCharts(snapshot);
+                    } catch (err) {
+                        console.warn('Failed to parse websocket snapshot', err);
+                    }
+                };
+
+                socket.onclose = () => {
+                    updateConnectionState('WebSocket disconnected, polling API', 'warn');
+                    if (!state.pollTimer) {
+                        state.pollTimer = setInterval(() => loadSnapshot(), 10000);
+                    }
+                    if (state.reconnectTimer) {
+                        clearTimeout(state.reconnectTimer);
+                    }
+                    state.reconnectTimer = setTimeout(connectWebSocket, 4000);
+                };
+
+                socket.onerror = () => {
+                    updateConnectionState('WebSocket error, using API polling', 'warn');
+                };
+            } catch (error) {
+                console.warn('WebSocket connection failed', error);
+                updateConnectionState('WebSocket unavailable, polling API', 'warn');
+            }
+        }
+
+        function switchView(viewName, element) {
             document.querySelectorAll('[id$="-view"]').forEach(el => el.style.display = 'none');
-            document.getElementById(viewName + '-view').style.display = 'block';
-            
+            const selected = document.getElementById(`${viewName}-view`);
+            if (selected) {
+                selected.style.display = 'block';
+            }
+
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            } else {
+                const fallback = document.querySelector(`.nav-item[data-view="${viewName}"]`);
+                if (fallback) {
+                    fallback.classList.add('active');
+                }
+            }
 
             const titles = {
                 dashboard: 'Dashboard',
@@ -1140,18 +1751,17 @@
                 health: 'System Health',
                 settings: 'Settings'
             };
-            document.getElementById('viewTitle').textContent = titles[viewName];
-
-            currentView = viewName;
+            document.getElementById('viewTitle').textContent = titles[viewName] || 'Dashboard';
         }
 
         function refreshData() {
-            updateDashboard();
+            loadSnapshot();
         }
 
         window.addEventListener('load', () => {
-            updateDashboard();
-            setInterval(updateDashboard, refreshInterval);
+            loadSnapshot();
+            connectWebSocket();
+            state.pollTimer = setInterval(() => loadSnapshot(), 15000);
         });
     </script>
 </body>
