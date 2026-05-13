@@ -67,11 +67,11 @@ type StoreToolInput struct {
 
 // RetrieveToolInput for MCP retrieve request
 type RetrieveToolInput struct {
-	TenantID   string  `json:"tenantId"`
-	AgentID    string  `json:"agentId"`
-	Query      string  `json:"query"`
-	Limit      int32   `json:"limit,omitempty"`
-	Threshold  float32 `json:"similarityThreshold,omitempty"`
+	TenantID  string  `json:"tenantId"`
+	AgentID   string  `json:"agentId"`
+	Query     string  `json:"query"`
+	Limit     int32   `json:"limit,omitempty"`
+	Threshold float32 `json:"similarityThreshold,omitempty"`
 }
 
 // NewMCPServer creates a new MCP server instance
@@ -106,11 +106,11 @@ func (s *MCPServer) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 				InputSchema: map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
-						"tenantId":    map[string]string{"type": "string", "description": "Tenant ID"},
-						"agentId":     map[string]string{"type": "string", "description": "Agent ID"},
-						"content":     map[string]string{"type": "string", "description": "Memory content"},
-						"type":        map[string]string{"type": "string", "description": "Memory type (episodic, semantic, etc)"},
-						"importance":  map[string]string{"type": "number", "description": "Importance score 0-1"},
+						"tenantId":   map[string]string{"type": "string", "description": "Tenant ID"},
+						"agentId":    map[string]string{"type": "string", "description": "Agent ID"},
+						"content":    map[string]string{"type": "string", "description": "Memory content"},
+						"type":       map[string]string{"type": "string", "description": "Memory type (episodic, semantic, etc)"},
+						"importance": map[string]string{"type": "number", "description": "Importance score 0-1"},
 					},
 					"required": []string{"tenantId", "agentId", "content"},
 				},
@@ -173,7 +173,7 @@ func (s *MCPServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(MCPResponse{
 				JSONRPCVersion: "2.0",
 				ID:             req.ID,
-				Error: &MCPError{Code: -32602, Message: "Invalid params: missing tool name"},
+				Error:          &MCPError{Code: -32602, Message: "Invalid params: missing tool name"},
 			})
 			return
 		}
@@ -184,7 +184,7 @@ func (s *MCPServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(MCPResponse{
 				JSONRPCVersion: "2.0",
 				ID:             req.ID,
-				Error: &MCPError{Code: -32602, Message: "Invalid params: missing arguments"},
+				Error:          &MCPError{Code: -32602, Message: "Invalid params: missing arguments"},
 			})
 			return
 		}
@@ -199,7 +199,7 @@ func (s *MCPServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(MCPResponse{
 				JSONRPCVersion: "2.0",
 				ID:             req.ID,
-				Error: &MCPError{Code: -32601, Message: "Unknown tool: " + toolName},
+				Error:          &MCPError{Code: -32601, Message: "Unknown tool: " + toolName},
 			})
 			return
 		}
@@ -209,7 +209,7 @@ func (s *MCPServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(MCPResponse{
 			JSONRPCVersion: "2.0",
 			ID:             req.ID,
-			Error: &MCPError{Code: -32601, Message: "Unknown method: " + req.Method},
+			Error:          &MCPError{Code: -32601, Message: "Unknown method: " + req.Method},
 		})
 		return
 	}
@@ -254,7 +254,7 @@ func (s *MCPServer) handleStoreTool(_ context.Context, input map[string]interfac
 
 	// This would call the actual gRPC handler
 	return map[string]interface{}{
-		"success":   true,
+		"success":  true,
 		"memoryId": uuid.New().String(),
 		"message":  "Memory stored successfully",
 	}, nil
@@ -285,7 +285,7 @@ func (s *MCPServer) handleRetrieveTool(_ context.Context, input map[string]inter
 
 	// This would call the actual gRPC handler
 	return map[string]interface{}{
-		"success":   true,
+		"success":  true,
 		"memories": []interface{}{},
 		"message":  fmt.Sprintf("Retrieved 0 memories for query: %s", query),
 	}, nil

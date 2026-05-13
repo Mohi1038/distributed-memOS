@@ -13,13 +13,13 @@ import (
 
 // ReflectionWorker handles background conversion of episodic memories to semantic
 type ReflectionWorker struct {
-	db          *storage.PostgresStore
-	qdrant      *storage.QdrantStore
-	embedder    EmbeddingGenerator
-	summarizer  TextSummarizer
-	batchSize   int
-	interval    time.Duration
-	stopChan    chan struct{}
+	db         *storage.PostgresStore
+	qdrant     *storage.QdrantStore
+	embedder   EmbeddingGenerator
+	summarizer TextSummarizer
+	batchSize  int
+	interval   time.Duration
+	stopChan   chan struct{}
 }
 
 // TextSummarizer creates semantic summaries from episodic memories
@@ -202,7 +202,7 @@ func (w *ReflectionWorker) processGroup(ctx context.Context, key string, memorie
 		AgentID:    memories[0].AgentID,
 		Type:       "MEMORY_TYPE_SEMANTIC",
 		Content:    summary,
-		Importance: 0.7, // Semantic memories have moderate importance
+		Importance: 0.7,                  // Semantic memories have moderate importance
 		Metadata:   memories[0].Metadata, // Keep original metadata
 	}
 
@@ -215,9 +215,9 @@ func (w *ReflectionWorker) processGroup(ctx context.Context, key string, memorie
 	// Save embedding to Qdrant
 	idStr := semanticMem.ID.String()
 	payload := map[string]interface{}{
-		"tenant_id": memories[0].TenantID.String(),
-		"agent_id":  memories[0].AgentID.String(),
-		"type":      "MEMORY_TYPE_SEMANTIC",
+		"tenant_id":    memories[0].TenantID.String(),
+		"agent_id":     memories[0].AgentID.String(),
+		"type":         "MEMORY_TYPE_SEMANTIC",
 		"is_reflected": true,
 	}
 	if err := w.qdrant.UpsertMemory(ctx, "memories", idStr, embedding, payload); err != nil {
