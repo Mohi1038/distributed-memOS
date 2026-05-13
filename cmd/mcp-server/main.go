@@ -9,13 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/mohi1038/memos/internal/api"
-	"github.com/mohi1038/memos/internal/core"
-	"github.com/mohi1038/memos/internal/storage"
 )
 
 // MCPServer implements the Model Context Protocol for MemOS
