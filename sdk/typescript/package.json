@@ -2,8 +2,27 @@
   "name": "@memos/sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for Distributed MemOS - Adaptive memory infrastructure for autonomous AI agents",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "require": "./dist/adapters/index.js",
+      "default": "./dist/adapters/index.js"
+    },
+    "./adapters/*": {
+      "types": "./dist/adapters/*.d.ts",
+      "require": "./dist/adapters/*.js",
+      "default": "./dist/adapters/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Mohi1038/distributed-memOS.git"
@@ -19,14 +38,23 @@
   ],
   "author": "MemOS Team",
   "license": "Apache-2.0",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc",
+    "clean": "rm -rf dist",
+    "build": "tsc -p tsconfig.json",
     "dev": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepack": "npm run clean && npm run build",
+    "prepublishOnly": "npm run prepack"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.11.0",
@@ -46,6 +74,7 @@
   },
   "files": [
     "dist",
+    "proto",
     "README.md",
     "LICENSE"
   ]
