@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -226,7 +226,7 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 	if limit <= 0 {
 		limit = 10
 	}
-	
+
 	// Fetch 2x results for better ranking
 	qdrantResults, err := h.qdrant.SearchMemories(ctx, "memories", queryEmbedding, uint64(limit)*2, req.TenantId, req.AgentId)
 	if err != nil {
@@ -239,7 +239,7 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 	// 3. Hydrate & Apply Cognitive Ranking
 	// R = α*S + β*T + γ*I + δ*C
 	weights := core.DefaultRankingWeights
-	
+
 	// Override with request weights if provided
 	if req.AlphaSemantic > 0 {
 		weights.Alpha = req.AlphaSemantic
@@ -253,7 +253,7 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 
 	for _, res := range qdrantResults {
 		idStr := res.Id.GetUuid()
-		
+
 		// Fetch full details from Postgres
 		var model *storage.MemoryModel
 		cacheKey := h.cacheKey(req.TenantId, idStr)
@@ -281,11 +281,11 @@ func (h *MemoryHandler) Retrieve(ctx context.Context, req *pb.RetrieveRequest) (
 
 		// Compute cognitive score with adaptive decay and reinforcement
 		memoryScore := core.ComputeRank(
-			res.Score,                         // Semantic similarity
-			model.Importance,                  // User-marked importance
-			model.ReinforcementScore,          // Adaptive reinforcement
-			model.DecayFactor,                 // Adaptive decay rate
-			model.CreatedAt,                   // Memory age
+			res.Score,                // Semantic similarity
+			model.Importance,         // User-marked importance
+			model.ReinforcementScore, // Adaptive reinforcement
+			model.DecayFactor,        // Adaptive decay rate
+			model.CreatedAt,          // Memory age
 			weights,
 		)
 

@@ -23,17 +23,17 @@ type TraceSpan struct {
 
 // Telemetry tracks service-level counters and coarse latency.
 type Telemetry struct {
-	storeCount        atomic.Int64
-	retrieveCount     atomic.Int64
-	auditWriteCount   atomic.Int64
-	auditReadCount    atomic.Int64
-	authDeniedCount   atomic.Int64
-	cacheHitCount     atomic.Int64
-	cacheMissCount    atomic.Int64
-	replicationLagNanos atomic.Int64
+	storeCount             atomic.Int64
+	retrieveCount          atomic.Int64
+	auditWriteCount        atomic.Int64
+	auditReadCount         atomic.Int64
+	authDeniedCount        atomic.Int64
+	cacheHitCount          atomic.Int64
+	cacheMissCount         atomic.Int64
+	replicationLagNanos    atomic.Int64
 	replicationLagMaxNanos atomic.Int64
-	storeLatencyNanos atomic.Int64
-	retrieveLatencyNanos atomic.Int64
+	storeLatencyNanos      atomic.Int64
+	retrieveLatencyNanos   atomic.Int64
 }
 
 func NewTelemetry() *Telemetry {
