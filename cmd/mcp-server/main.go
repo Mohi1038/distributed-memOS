@@ -230,7 +230,7 @@ func (s *MCPServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleStoreTool handles store_memory tool calls
-func (s *MCPServer) handleStoreTool(ctx context.Context, input map[string]interface{}) (interface{}, error) {
+func (s *MCPServer) handleStoreTool(_ context.Context, input map[string]interface{}) (interface{}, error) {
 	// Parse input
 	tenantID, _ := input["tenantId"].(string)
 	agentID, _ := input["agentId"].(string)
@@ -261,7 +261,7 @@ func (s *MCPServer) handleStoreTool(ctx context.Context, input map[string]interf
 }
 
 // handleRetrieveTool handles retrieve_memory tool calls
-func (s *MCPServer) handleRetrieveTool(ctx context.Context, input map[string]interface{}) (interface{}, error) {
+func (s *MCPServer) handleRetrieveTool(_ context.Context, input map[string]interface{}) (interface{}, error) {
 	// Parse input
 	tenantID, _ := input["tenantId"].(string)
 	agentID, _ := input["agentId"].(string)
