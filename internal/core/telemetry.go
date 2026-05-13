@@ -36,8 +36,76 @@ type Telemetry struct {
 	retrieveLatencyNanos   atomic.Int64
 }
 
+// TelemetrySnapshot captures the live counters used by the dashboard.
+type TelemetrySnapshot struct {
+	StoreCount           int64   `json:"storeCount"`
+	RetrieveCount        int64   `json:"retrieveCount"`
+	AuditWriteCount      int64   `json:"auditWriteCount"`
+	AuditReadCount       int64   `json:"auditReadCount"`
+	AuthDeniedCount      int64   `json:"authDeniedCount"`
+	CacheHitCount        int64   `json:"cacheHitCount"`
+	CacheMissCount       int64   `json:"cacheMissCount"`
+	CacheHitRate         float64 `json:"cacheHitRate"`
+	ReplicationLagAvgMs  float64 `json:"replicationLagAvgMs"`
+	ReplicationLagMaxMs  float64 `json:"replicationLagMaxMs"`
+	StoreLatencyAvgMs    float64 `json:"storeLatencyAvgMs"`
+	RetrieveLatencyAvgMs float64 `json:"retrieveLatencyAvgMs"`
+	TotalRequests        int64   `json:"totalRequests"`
+}
+
 func NewTelemetry() *Telemetry {
 	return &Telemetry{}
+}
+
+// Snapshot returns the current counters as a dashboard-friendly payload.
+func (t *Telemetry) Snapshot() TelemetrySnapshot {
+	storeCount := t.storeCount.Load()
+	retrieveCount := t.retrieveCount.Load()
+	auditWriteCount := t.auditWriteCount.Load()
+	auditReadCount := t.auditReadCount.Load()
+	authDeniedCount := t.authDeniedCount.Load()
+	cacheHitCount := t.cacheHitCount.Load()
+	cacheMissCount := t.cacheMissCount.Load()
+	replicationLagNanos := t.replicationLagNanos.Load()
+	replicationLagMaxNanos := t.replicationLagMaxNanos.Load()
+	storeLatency := t.storeLatencyNanos.Load()
+	retrieveLatency := t.retrieveLatencyNanos.Load()
+
+	cacheHitRate := float64(0)
+	if totalCache := cacheHitCount + cacheMissCount; totalCache > 0 {
+		cacheHitRate = float64(cacheHitCount) / float64(totalCache) * 100
+	}
+
+	storeLatencyAvgMs := float64(0)
+	if storeCount > 0 {
+		storeLatencyAvgMs = float64(storeLatency) / float64(storeCount) / float64(time.Millisecond)
+	}
+
+	retrieveLatencyAvgMs := float64(0)
+	if retrieveCount > 0 {
+		retrieveLatencyAvgMs = float64(retrieveLatency) / float64(retrieveCount) / float64(time.Millisecond)
+	}
+
+	replicationLagAvgMs := float64(0)
+	if storeCount > 0 {
+		replicationLagAvgMs = float64(replicationLagNanos) / float64(storeCount) / float64(time.Millisecond)
+	}
+
+	return TelemetrySnapshot{
+		StoreCount:           storeCount,
+		RetrieveCount:        retrieveCount,
+		AuditWriteCount:      auditWriteCount,
+		AuditReadCount:       auditReadCount,
+		AuthDeniedCount:      authDeniedCount,
+		CacheHitCount:        cacheHitCount,
+		CacheMissCount:       cacheMissCount,
+		CacheHitRate:         cacheHitRate,
+		ReplicationLagAvgMs:  replicationLagAvgMs,
+		ReplicationLagMaxMs:  float64(replicationLagMaxNanos) / float64(time.Millisecond),
+		StoreLatencyAvgMs:    storeLatencyAvgMs,
+		RetrieveLatencyAvgMs: retrieveLatencyAvgMs,
+		TotalRequests:        storeCount + retrieveCount,
+	}
 }
 
 func (t *Telemetry) RecordStore(duration time.Duration) {
@@ -100,6 +168,14 @@ func (t *Telemetry) TraceRetrievalDecision(span TraceSpan) {
 
 // Handler returns a minimal Prometheus-compatible metrics payload.
 func (t *Telemetry) Handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	storeCount := t.storeCount.Load()
 	retrieveCount := t.retrieveCount.Load()
 	auditCount := t.auditWriteCount.Load()
