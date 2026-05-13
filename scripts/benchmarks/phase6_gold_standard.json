@@ -1,0 +1,111 @@
+{
+  "name": "memos-phase6-gold-standard",
+  "description": "Human-annotated relevance judgments for phase 6 retrieval evaluation.",
+  "queries": [
+    {
+      "query_id": "q-ui-preferences",
+      "query": "What does the user prefer for the interface theme?",
+      "relevant_memory_ids": ["m-ui-1", "m-ui-3"],
+      "candidates": [
+        {
+          "memory_id": "m-ui-1",
+          "semantic_score": 0.93,
+          "age_hours": 8,
+          "importance": 0.91,
+          "human_relevance": true
+        },
+        {
+          "memory_id": "m-ui-2",
+          "semantic_score": 0.81,
+          "age_hours": 2,
+          "importance": 0.45,
+          "human_relevance": false
+        },
+        {
+          "memory_id": "m-ui-3",
+          "semantic_score": 0.77,
+          "age_hours": 1,
+          "importance": 0.86,
+          "human_relevance": true
+        },
+        {
+          "memory_id": "m-ui-4",
+          "semantic_score": 0.49,
+          "age_hours": 0.5,
+          "importance": 0.35,
+          "human_relevance": false
+        }
+      ]
+    },
+    {
+      "query_id": "q-replication",
+      "query": "What happened during cluster replication failure recovery?",
+      "relevant_memory_ids": ["m-dist-1"],
+      "candidates": [
+        {
+          "memory_id": "m-dist-1",
+          "semantic_score": 0.84,
+          "age_hours": 96,
+          "importance": 0.97,
+          "human_relevance": true
+        },
+        {
+          "memory_id": "m-dist-2",
+          "semantic_score": 0.79,
+          "age_hours": 4,
+          "importance": 0.43,
+          "human_relevance": false
+        },
+        {
+          "memory_id": "m-dist-3",
+          "semantic_score": 0.58,
+          "age_hours": 12,
+          "importance": 0.73,
+          "human_relevance": false
+        },
+        {
+          "memory_id": "m-dist-4",
+          "semantic_score": 0.32,
+          "age_hours": 1,
+          "importance": 0.22,
+          "human_relevance": false
+        }
+      ]
+    },
+    {
+      "query_id": "q-agent-setup",
+      "query": "How should a new agent be configured for long-term recall?",
+      "relevant_memory_ids": ["m-agent-2"],
+      "candidates": [
+        {
+          "memory_id": "m-agent-1",
+          "semantic_score": 0.88,
+          "age_hours": 120,
+          "importance": 0.55,
+          "human_relevance": false
+        },
+        {
+          "memory_id": "m-agent-2",
+          "semantic_score": 0.73,
+          "age_hours": 3,
+          "importance": 0.9,
+          "human_relevance": true
+        },
+        {
+          "memory_id": "m-agent-3",
+          "semantic_score": 0.68,
+          "age_hours": 0.8,
+          "importance": 0.31,
+          "human_relevance": false
+        },
+        {
+          "memory_id": "m-agent-4",
+          "semantic_score": 0.4,
+          "age_hours": 48,
+          "importance": 0.79,
+          "human_relevance": false
+        }
+      ]
+    }
+  ]
+}
