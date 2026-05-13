@@ -74,13 +74,13 @@ This document outlines the engineering roadmap to transition Distributed MemOS f
 **Goal:** Move beyond a "project" into an infrastructure substrate.
 
 ### 5.1 SDK & Framework Integration
-- [ ] **TypeScript SDK**: Build a parity-level SDK for Node.js/Web environments.
-- [ ] **Agent Integrations**: Build official adapters for LangGraph, CrewAI, and AutoGen.
-- [ ] **MCP Server**: Implement the Model Context Protocol (MCP) to allow any LLM to use MemOS as a tool.
+- [x] **TypeScript SDK**: Build a parity-level SDK for Node.js/Web environments.
+- [x] **Agent Integrations**: Build official adapters for LangGraph, CrewAI, and AutoGen.
+- [x] **MCP Server**: Implement the Model Context Protocol (MCP) to allow any LLM to use MemOS as a tool.
 
 ### 5.2 Observability Dashboard
-- [ ] **Real-time Viz**: Build a dashboard showing replication lag, shard distribution, and cognitive decay heatmaps.
-- [ ] **Graph Visualizer**: A 3D view of the evolving Neo4j entity graph.
+- [x] **Real-time Viz**: Build a dashboard showing replication lag, shard distribution, and cognitive decay heatmaps.
+- [x] **Graph Visualizer**: A 3D view of the evolving Neo4j entity graph.
 
 ---
 
